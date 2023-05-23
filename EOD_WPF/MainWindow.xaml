@@ -1,0 +1,29 @@
+﻿<Window x:Class="EOD_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EOD_WPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="57*"/>
+            <ColumnDefinition Width="343*"/>
+        </Grid.ColumnDefinitions>
+        <Ellipse Fill="DarkGray" Stroke="Black" x:Name="RightThumbCircle" Height="90" Margin="24,173,0,171" Width="90" HorizontalAlignment="Left" Grid.Column="1"/>
+        <Ellipse Fill="DarkGray" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Height="30" Stroke="Black" x:Name="RightThumbPositionsCircle" Margin="54,0,0,0" Grid.Column="1"/>
+        <Ellipse Fill="DarkGray" Stroke="Black" x:Name="LeftThumbCircle" Height="90" Margin="15,0,0,0" Width="90" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Ellipse Fill="DarkGray" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Height="30" Stroke="Black" x:Name="LeftThumbPositionsCircle" Margin="45,0,0,0"/>
+        <Border Background="DarkRed" CornerRadius="0,0,0,0" x:Name="ConnectedBorder" ToolTip="Connection Status" Margin="21,10,0,0" HorizontalAlignment="Left" Width="21" Height="22" VerticalAlignment="Top" Grid.Column="1"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="30,283,0,0" Orientation="Vertical" Height="84" ValueChanged="LeftTrigger_ValueChanged"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="18" x:Name="RightTrigger" Minimum="0.0" Maximum="1.0" ToolTip="Right Trigger" Margin="39,283,0,0" Orientation="Vertical" Height="84" Grid.Column="1"/>
+        <ComboBox x:Name="comports" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comports_SelectionChanged" Grid.ColumnSpan="2"/>
+        <ListView x:Name="log" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,37,0,0" SelectionChanged="log_SelectionChanged" HorizontalAlignment="Left" Width="218" Grid.ColumnSpan="2" Height="130" VerticalAlignment="Top"></ListView>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger_Copy" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="50,283,0,0" Orientation="Vertical" Height="84" ValueChanged="LeftTrigger_ValueChanged"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger_Copy1" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="70,283,0,0" Orientation="Vertical" Height="84" ValueChanged="LeftTrigger_ValueChanged"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger_Copy2" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="59,283,0,0" Orientation="Vertical" Height="84" ValueChanged="LeftTrigger_ValueChanged" Grid.Column="1"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger_Copy3" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="79,283,0,0" Orientation="Vertical" Height="84" Grid.Column="1"/>
+
+    </Grid>
+</Window>
