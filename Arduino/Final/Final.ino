@@ -40,35 +40,35 @@ void setup() {
 }
 
 void loop() {
-  current_millis = millis();
-  if (current_millis != prev_millis) {
-    counter ++;
-    if (counter > 100) counter = 0;{
-      if (Serial.available() != 0) {
-        float current_mA = 0;
-        current_mA = ina219.getCurrent_mA();
-        Serial.println(current_mA);
-        prev_millis = current_millis;
-      }
-    }
-  }
+  // current_millis = millis();
+  // if (current_millis != prev_millis) {
+  //   counter ++;
+  //   if (counter > 100) counter = 0;{
+  //     if (Serial.available() != 0) {
+  //       float current_mA = 0;
+  //       current_mA = ina219.getCurrent_mA();
+  //       //Serial.println(current_mA);
+  //       prev_millis = current_millis;
+  //     }
+  //   }
+  // }
 
-   getData();
-   if (newData == true) {
-      if ((int)buf[0] == 0)
-      {
-        linservo.write((int)buf[1]);
-      }
-      if ((int)buf[0]== 1)
-      {
-        leftservo.write((int)buf[1]);
-      }
-      if ((int)buf[0] == 2)
-      {
-        rightservo.write((int)buf[1]);
-      }
-      newData = false;
+  getData();
+  if (newData == true) {
+    if ((int)buf[0] == 0)
+    {
+      linservo.write((int)buf[1]);
     }
+    if ((int)buf[0]== 1)
+    {
+      leftservo.write((int)buf[1]);
+    }
+    if ((int)buf[0] == 2)
+    {
+      rightservo.write((int)buf[1]);
+    }
+    newData = false;
+  }
 }
 
 

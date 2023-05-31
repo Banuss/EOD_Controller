@@ -23,11 +23,6 @@
         <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="FineRumble" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="154,241,0,0" Orientation="Vertical" Height="84" ValueChanged="RightRumble_ValueChanged" Grid.Column="2"/>
         <Label x:Name="ma1" Content="Force Ch1" HorizontalAlignment="Left" Margin="6,220,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
         <Label x:Name="ma2" Content="Force Ch2" HorizontalAlignment="Left" Margin="33,220,0,0" VerticalAlignment="Top" Grid.Column="2"/>
-
-
-
-
-
         <ComboBox x:Name="comports" HorizontalAlignment="Left" Margin="113,50,0,0" VerticalAlignment="Top" Width="225" SelectionChanged="comports_SelectionChanged" Grid.Column="2"/>
         <ListView x:Name="log" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="1,80,0,0" HorizontalAlignment="Left" Width="387" Height="130" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Grid.Column="1">
             <ListView.RenderTransform>
@@ -39,12 +34,16 @@
                 </TransformGroup>
             </ListView.RenderTransform>
         </ListView>
+        <Image x:Name="Logo" HorizontalAlignment="Left" Height="37" Margin="6,0,0,0" VerticalAlignment="Top" Width="237" Source="/Logo_small.png" Grid.ColumnSpan="3"/>
+        <Label x:Name="Label_Arduino" Content="Select RobotController Port:" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.132,0.04" Grid.ColumnSpan="3" Width="165"/>
 
-        <h:HelixViewport3D x:Name="HelixViewPort3D" 
+
+        <h:HelixViewport3D x:Name="viewPort3d" 
         ZoomExtentsWhenLoaded="True" 
         CameraRotationMode="Turntable" 
         ModelUpDirection="0,1,0" 
-        ShowCoordinateSystem="True" Grid.ColumnSpan="5" Margin="0,0,0,10" Panel.ZIndex="-50">
+        ShowCoordinateSystem="True" Grid.ColumnSpan="10" Margin="0,0,0,10" Panel.ZIndex="-50">
+
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera 
                 Position="-15, -20, 10" 
@@ -52,6 +51,7 @@
                 FieldOfView="45" 
                 UpDirection="0,0.1,0"/>
             </h:HelixViewport3D.Camera>
+            <h:DefaultLights/>
 
             <h:GridLinesVisual3D Width="1600" Length="1600" MinorDistance="100" MajorDistance="800" Thickness="2" Center="0, 0, 0">
                 <h:GridLinesVisual3D.Transform>
@@ -62,9 +62,12 @@
                     </RotateTransform3D>
                 </h:GridLinesVisual3D.Transform>
             </h:GridLinesVisual3D>
-        </h:HelixViewport3D>
-        <Image x:Name="Logo" HorizontalAlignment="Left" Height="37" Margin="6,0,0,0" VerticalAlignment="Top" Width="237" Source="/Logo_small.png" Grid.ColumnSpan="3"/>
-        <Label x:Name="Label_Arduino" Content="Select RobotController Port:" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.132,0.04" Grid.ColumnSpan="3" Width="165"/>
 
+        </h:HelixViewport3D>
+        <Slider x:Name="RotationJ1" Grid.Column="2" HorizontalAlignment="Left" Margin="10,357,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ2" Grid.Column="2" HorizontalAlignment="Left" Margin="10,396,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ3" Grid.Column="2" HorizontalAlignment="Left" Margin="10,440,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ4" Grid.Column="2" HorizontalAlignment="Left" Margin="10,480,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <RadioButton x:Name="Simulate" Grid.Column="2" Content="Simulate Live" HorizontalAlignment="Left" Margin="18,515,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

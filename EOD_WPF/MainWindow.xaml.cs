@@ -8,6 +8,12 @@ using System.Linq;
 using System.Windows.Data;
 using System.Windows.Threading;
 using System.Net.Sockets;
+using HelixToolkit.Wpf;
+using System.Windows.Media.Media3D;
+using System.Reflection;
+using System.Collections.Generic;
+using System.IO;
+using EOD_WPF.Model;
 
 namespace EOD_WPF
 {
@@ -19,20 +25,26 @@ namespace EOD_WPF
         XBoxController controller = new XBoxController();
         SerialPort Arduino = new SerialPort();
         bool invert = false;
+        Franka franka = null;
 
-
+    
         public MainWindow()
         {
             InitializeComponent();
+            franka = new Franka(viewPort3d);
+
+            var guiDisp = Application.Current.Dispatcher;
+
             controller.Connection.ValueChanged += (s, e) => {
                 new LogItem($"Controller {controller.Connection}").print(log);
                 new LogItem($"Battery {controller.Battery.Value}").print(log);
                 };
 
+            Arduino.ErrorReceived += (s, e) => guiDisp.Invoke(() => { new LogItem($"Error {e.ToString()}").print(log); });
 
             DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(UpdateMotors);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 5);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
             dispatcherTimer.Start();
 
             foreach (string port in SerialPort.GetPortNames())
@@ -53,7 +65,6 @@ namespace EOD_WPF
                 DisplayMemberBinding = new Binding("Message")
             });
 
-            var guiDisp = Application.Current.Dispatcher;
 
             Arduino.DataReceived += (s, e) => guiDisp.Invoke(() => 
             {
@@ -74,6 +85,18 @@ namespace EOD_WPF
                     LeftTrigger.Value -= e.Value;
                 }
                
+            });
+
+            controller.LeftThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                RotationJ1.Value = controller.LeftThumbstick.Value.X * RotationJ1.Maximum;
+                RotationJ2.Value = controller.LeftThumbstick.Value.Y * RotationJ2.Maximum;
+            });
+
+            controller.RightThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                RotationJ3.Value = controller.RightThumbstick.Value.X * RotationJ3.Maximum;
+                RotationJ4.Value = controller.RightThumbstick.Value.Y * RotationJ4.Maximum;
             });
 
             controller.RightTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() => 
@@ -107,8 +130,12 @@ namespace EOD_WPF
 
         private void UpdateMotors(object sender, EventArgs args)
         {
-            SendMotor(1, (int)(LeftTrigger.Value * 180));
-            SendMotor(2, (int)(RightTrigger.Value * 180));
+            if (Arduino.IsOpen)
+            {
+                SendMotor(1, (int)(LeftTrigger.Value * 180));
+                SendMotor(2, (int)(RightTrigger.Value * 180));
+            }
+            
         }
 
         private void SendMotor(byte motor, int speed)
@@ -145,10 +172,21 @@ namespace EOD_WPF
             catch (Exception ex)
             {
                 new LogItem($"Can't connect to {port} stacktrace: {ex.StackTrace}").print(log);
+                Arduino.Close();
             }
         }
 
-   
+        private void LeftRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            controller.LeftRumble.Rumble((float)RoughRumble.Value);
+        }
+
+        private void RightRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            controller.RightRumble.Rumble((float)FineRumble.Value);
+        }
+
+
         public class LogItem
         {
             public DateTime Timestamp { get; set; }
@@ -167,14 +205,17 @@ namespace EOD_WPF
             }
         }
 
-        private void LeftRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            controller.LeftRumble.Rumble((float)RoughRumble.Value);
-        }
-
-        private void RightRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            controller.RightRumble.Rumble((float)FineRumble.Value);
+            franka.joints[1].angle = RotationJ1.Value;
+            franka.joints[2].angle = RotationJ2.Value;
+            franka.joints[3].angle = RotationJ3.Value;
+            franka.joints[4].angle = RotationJ4.Value;
+            if ((bool)Simulate.IsChecked)
+            {
+                franka.execute_fk();
+            }
+            
         }
     }
 }
