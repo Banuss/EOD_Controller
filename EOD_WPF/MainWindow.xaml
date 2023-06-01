@@ -7,24 +7,21 @@
         xmlns:h="http://helix-toolkit.org/wpf" x:Class="EOD_WPF.MainWindow"
         mc:Ignorable="d"
         Title="Bomkoffer.nl | RobotControllerDemo GUI | Demcon Group 1 - Saxion Hogeschool 2023" Height="1079" Width="1920">
-    <Grid Margin="0,0,0,-6">
+    <Grid Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="9*"/>
-            <ColumnDefinition Width="50*"/>
-            <ColumnDefinition Width="561*"/>
-            <ColumnDefinition Width="495*"/>
-            <ColumnDefinition Width="805*"/>
+            <ColumnDefinition Width="207*"/>
+            <ColumnDefinition Width="433*"/>
         </Grid.ColumnDefinitions>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="6,241,0,0" Orientation="Vertical" Height="84" Grid.Column="1" />
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="18" x:Name="RightTrigger" Minimum="0.0" Maximum="1.0" ToolTip="Right Trigger" Margin="45,241,0,0" Orientation="Vertical" Height="84" Grid.Column="2"/>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftFeedback" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="26,241,0,0" Orientation="Vertical" Height="84" Grid.Column="1"/>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="RoughRumble" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="129,241,0,0" Orientation="Vertical" Height="84" ValueChanged="LeftRumble_ValueChanged" Grid.Column="2"/>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="RightFeedback" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="68,241,0,0" Orientation="Vertical" Height="84" Grid.Column="2"/>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="FineRumble" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="154,241,0,0" Orientation="Vertical" Height="84" ValueChanged="RightRumble_ValueChanged" Grid.Column="2"/>
-        <Label x:Name="ma1" Content="Force Ch1" HorizontalAlignment="Left" Margin="6,220,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
-        <Label x:Name="ma2" Content="Force Ch2" HorizontalAlignment="Left" Margin="33,220,0,0" VerticalAlignment="Top" Grid.Column="2"/>
-        <ComboBox x:Name="comports" HorizontalAlignment="Left" Margin="113,50,0,0" VerticalAlignment="Top" Width="225" SelectionChanged="comports_SelectionChanged" Grid.Column="2"/>
-        <ListView x:Name="log" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="1,80,0,0" HorizontalAlignment="Left" Width="387" Height="130" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Grid.Column="1">
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftTrigger" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="6,241,0,0" Orientation="Vertical" Height="84" />
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="18" x:Name="RightTrigger" Minimum="0.0" Maximum="1.0" ToolTip="Right Trigger" Margin="86,241,0,0" Orientation="Vertical" Height="84"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftFeedback" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="26,241,0,0" Orientation="Vertical" Height="84"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="RoughRumble" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="151,241,0,0" Orientation="Vertical" Height="84" ValueChanged="LeftRumble_ValueChanged"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="RightFeedback" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="108,241,0,0" Orientation="Vertical" Height="84"/>
+        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="FineRumble" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="173,241,0,0" Orientation="Vertical" Height="84" ValueChanged="RightRumble_ValueChanged"/>
+        <Label x:Name="ma1" Content="Force Ch1" HorizontalAlignment="Left" Margin="6,220,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="ma2" Content="Force Ch2" HorizontalAlignment="Left" Margin="76,220,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="comports" HorizontalAlignment="Left" Margin="174,50,0,0" VerticalAlignment="Top" Width="84" SelectionChanged="comports_SelectionChanged"/>
+        <ListView x:Name="log" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="1,80,0,0" HorizontalAlignment="Left" Width="584" Height="130" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
             <ListView.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -34,23 +31,15 @@
                 </TransformGroup>
             </ListView.RenderTransform>
         </ListView>
-        <Image x:Name="Logo" HorizontalAlignment="Left" Height="37" Margin="6,0,0,0" VerticalAlignment="Top" Width="237" Source="/Logo_small.png" Grid.ColumnSpan="3"/>
-        <Label x:Name="Label_Arduino" Content="Select RobotController Port:" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.132,0.04" Grid.ColumnSpan="3" Width="165"/>
+        <Image x:Name="Logo" HorizontalAlignment="Left" Height="37" Margin="6,0,0,0" VerticalAlignment="Top" Width="237" Source="/Logo_small.png"/>
+        <Label x:Name="Label_Arduino" Content="Select RobotController Port:" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.132,0.04" Width="165"/>
 
 
-        <h:HelixViewport3D x:Name="viewPort3d" 
-        ZoomExtentsWhenLoaded="True" 
-        CameraRotationMode="Turntable" 
-        ModelUpDirection="0,1,0" 
-        ShowCoordinateSystem="True" Grid.ColumnSpan="10" Margin="0,0,0,10" Panel.ZIndex="-50">
-
+        <h:HelixViewport3D x:Name="viewPort3d" ZoomExtentsWhenLoaded="True" CameraRotationMode="Turntable" ModelUpDirection="0,1,0" ShowCoordinateSystem="True" Panel.ZIndex="-50" Width="1920" Grid.ColumnSpan="2">
             <h:HelixViewport3D.Camera>
-                <PerspectiveCamera 
-                Position="-15, -20, 10" 
-                LookDirection="15, -20, -15" 
-                FieldOfView="45" 
-                UpDirection="0,0.1,0"/>
+                <PerspectiveCamera Position="-15, -20, 10" LookDirection="15, -20, -15" FieldOfView="45" UpDirection="0,0.1,0"/>
             </h:HelixViewport3D.Camera>
+
             <h:DefaultLights/>
 
             <h:GridLinesVisual3D Width="1600" Length="1600" MinorDistance="100" MajorDistance="800" Thickness="2" Center="0, 0, 0">
@@ -62,12 +51,29 @@
                     </RotateTransform3D>
                 </h:GridLinesVisual3D.Transform>
             </h:GridLinesVisual3D>
-
         </h:HelixViewport3D>
-        <Slider x:Name="RotationJ1" Grid.Column="2" HorizontalAlignment="Left" Margin="10,357,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ2" Grid.Column="2" HorizontalAlignment="Left" Margin="10,396,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ3" Grid.Column="2" HorizontalAlignment="Left" Margin="10,440,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ4" Grid.Column="2" HorizontalAlignment="Left" Margin="10,480,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
-        <RadioButton x:Name="Simulate" Grid.Column="2" Content="Simulate Live" HorizontalAlignment="Left" Margin="18,515,0,0" VerticalAlignment="Top"/>
+
+
+        <Slider x:Name="RotationJ1" HorizontalAlignment="Left" Margin="16,344,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ2" HorizontalAlignment="Left" Margin="16,380,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ3" HorizontalAlignment="Left" Margin="16,418,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ4" HorizontalAlignment="Left" Margin="16,454,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ5" HorizontalAlignment="Left" Margin="16,490,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ6" HorizontalAlignment="Left" Margin="16,525,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+        <Slider x:Name="RotationJ7" HorizontalAlignment="Left" Margin="16,561,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="180" Minimum="-180"/>
+
+        <Slider x:Name="SpeedJ1" HorizontalAlignment="Left" Margin="137,344,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseDown="resetSender"/>
+        <Slider x:Name="SpeedJ2" HorizontalAlignment="Left" Margin="137,380,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+        <Slider x:Name="SpeedJ3" HorizontalAlignment="Left" Margin="137,418,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+        <Slider x:Name="SpeedJ4" HorizontalAlignment="Left" Margin="137,454,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+        <Slider x:Name="SpeedJ5" HorizontalAlignment="Left" Margin="137,490,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+        <Slider x:Name="SpeedJ6" HorizontalAlignment="Left" Margin="137,525,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+        <Slider x:Name="SpeedJ7" HorizontalAlignment="Left" Margin="137,561,0,0" VerticalAlignment="Top" Width="120" ValueChanged="Slider_ValueChanged" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+
+        <Slider x:Name="SliderY" HorizontalAlignment="Left" Margin="212,241,0,0" VerticalAlignment="Top" Width="21" Maximum="180" Minimum="-180" Orientation="Vertical" Height="87" ValueChanged="xyz_update"/>
+        <Slider x:Name="SliderX" HorizontalAlignment="Left" Margin="218,233,0,0" VerticalAlignment="Top" Width="79" Maximum="180" Minimum="-180" Height="13" ValueChanged="xyz_update"/>
+        <Slider x:Name="SliderZ" HorizontalAlignment="Left" Margin="297,241,0,0" VerticalAlignment="Top" Width="15" Maximum="180" Minimum="-180" Orientation="Vertical" Height="84" ValueChanged="xyz_update" />
+        <CheckBox x:Name="Live" Content="Simulate" HorizontalAlignment="Left" Margin="106,594,0,0" VerticalAlignment="Top"/>
+
     </Grid>
 </Window>

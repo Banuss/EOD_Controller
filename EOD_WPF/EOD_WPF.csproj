@@ -14,9 +14,11 @@
   <ItemGroup>
     <PackageReference Include="HelixToolkit" Version="2.24.0" />
     <PackageReference Include="HelixToolkit.Wpf" Version="2.24.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SharpDX" Version="4.2.0" />
     <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+    <PackageReference Include="Websocket.Client" Version="4.6.1" />
   </ItemGroup>
 
   <ItemGroup>
