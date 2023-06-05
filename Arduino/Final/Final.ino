@@ -1,8 +1,6 @@
 #include <Servo.h>
 #include <Adafruit_INA219.h>
 
-
-
 #define LEFTSERVOPIN 9 //Orange PWM, RED +5V, Brown GND
 #define RIGHTSERVOPIN 10
 #define LINSERVOPIN 11
