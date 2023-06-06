@@ -5,6 +5,8 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System.IO;
+using System.Windows.Controls;
+using System.Windows.Ink;
 
 namespace EOD_WPF.Model
 {
@@ -24,6 +26,7 @@ namespace EOD_WPF.Model
         private const string MODEL_PATHG = "FRANKA_G.STL";
 
         Model3DGroup RA = new Model3DGroup();
+        Model3D newLocCircle = null; 
         public List<Joint> joints = null;
 
         string basePath = "";
@@ -38,6 +41,8 @@ namespace EOD_WPF.Model
         RotateTransform3D R;
         TranslateTransform3D T;
 
+        public Vector3D reachingPoint;
+        public Vector3D headPoint;
 
         double LearningRate = 0.01;
         double SamplingDistance = 0.15;
@@ -48,9 +53,16 @@ namespace EOD_WPF.Model
             basePath = $"{Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName}\\Model\\";
             List<string> modelsNames = new List<string>() { MODEL_PATHB, MODEL_PATH1, MODEL_PATH2, MODEL_PATH3, MODEL_PATH4, MODEL_PATH5, MODEL_PATH6, MODEL_PATH7 };
             ModelVisual3D RoboticArm = new ModelVisual3D();
+
+            var builder = new MeshBuilder(true, true);
+            builder.AddSphere(new Point3D(0, 0, 0), 50, 15, 15);
+            newLocCircle = new GeometryModel3D(builder.ToMesh(), Materials.Yellow);
+            var NewLocation = new ModelVisual3D();
+            NewLocation.Content = newLocCircle;
+
             RoboticArm.Content = Initialize_Environment(modelsNames);
-            RoboticArm.Content.Transform = new RotateTransform3D(new AxisAngleRotation3D(new Vector3D(1, 0, 0), -90));
             viewPort3d.Children.Add(RoboticArm);
+            viewPort3d.Children.Add(NewLocation);
             execute_fk();
         }
 
@@ -70,16 +82,17 @@ namespace EOD_WPF.Model
 
         public void execute_ik(Vector3D reachingPoint)
         {
-            double[] angles = {
-                joints[0].angle,
-                joints[1].angle,
-                joints[2].angle,
-                joints[3].angle,
-                joints[4].angle,
-                joints[5].angle,
-                joints[6].angle,
-                joints[7].angle};
-           InverseKinematics(reachingPoint, angles);
+            newLocCircle.Transform = new TranslateTransform3D(reachingPoint);
+            double[] angles = { joints[0].angle, joints[1].angle, joints[2].angle, joints[3].angle, joints[4].angle, joints[5].angle, joints[6].angle, joints[7].angle };
+            angles = InverseKinematics(reachingPoint, angles);
+            joints[0].angle = angles[0];
+            joints[1].angle = angles[1];
+            joints[2].angle = angles[2];
+            joints[3].angle = angles[3];
+            joints[4].angle = angles[4];
+            joints[5].angle = angles[5];
+            joints[6].angle = angles[6];
+            joints[7].angle = angles[7];
         }
 
         public Vector3D ForwardKinematics(double[] angles)
@@ -158,7 +171,10 @@ namespace EOD_WPF.Model
             joints[6].model.Transform = F7;
             joints[7].model.Transform = F8;
 
-            return new Vector3D(joints[7].model.Bounds.Location.X, joints[7].model.Bounds.Location.Y, joints[7].model.Bounds.Location.Z);
+            var goal =  new Vector3D(joints[7].model.Bounds.Location.X, joints[7].model.Bounds.Location.Y, joints[7].model.Bounds.Location.Z);
+            headPoint = goal;
+            return goal;
+
 
         }
 
@@ -272,13 +288,15 @@ namespace EOD_WPF.Model
 
         public double[] InverseKinematics(Vector3D target, double[] angles)
         {
+            //Check if location is location
             if (DistanceFromTarget(target, angles) < DistanceThreshold)
             {
                 return angles;
             }
-            double[] oldAngles = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+            double[] oldAngles = new double[8];
             angles.CopyTo(oldAngles, 0);
-            for (int i = 0; i <= 7; i++)
+            for (int i = 0; i <= 8; i++)
             {
                 double gradient = PartialGradient(target, angles, i);
                 angles[i] -= LearningRate * gradient;
@@ -315,7 +333,6 @@ namespace EOD_WPF.Model
                 if (oldAngles[i] != angles[i])
                     return false;
             }
-
             return true;
         }
 

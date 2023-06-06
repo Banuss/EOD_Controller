@@ -10,6 +10,7 @@ using HelixToolkit.Wpf;
 using EOD_WPF.Model;
 using EOD_WPF.Remote;
 using System.Windows.Media.Media3D;
+using System.Security.Cryptography.X509Certificates;
 
 namespace EOD_WPF
 {
@@ -24,6 +25,8 @@ namespace EOD_WPF
         Franka franka = null;
         Rumble rumble = null;
         Dispatcher guiDisp = Application.Current.Dispatcher;
+        int maxspeed = 1;
+        double drift = 0.5;
 
         bool hold_A;
 
@@ -46,6 +49,7 @@ namespace EOD_WPF
             RotationJ3.IsEnabled = false;
             SpeedJ3.IsEnabled = false;
 
+            //Setting Slider Settings
             RotationJ1.Maximum = franka.joints[1].angleMax;
             RotationJ1.Minimum = franka.joints[1].angleMin;
             RotationJ1.Value = (RotationJ1.Maximum + RotationJ1.Minimum) / 2; 
@@ -68,11 +72,42 @@ namespace EOD_WPF
             RotationJ7.Minimum = franka.joints[7].angleMin;
             RotationJ7.Value = (RotationJ7.Maximum + RotationJ7.Minimum) / 2;
 
+            SpeedJ1.Maximum = maxspeed;
+            SpeedJ1.Minimum = -maxspeed;
+            SpeedJ2.Maximum = maxspeed;
+            SpeedJ2.Minimum = -maxspeed;
+            SpeedJ3.Maximum = maxspeed;
+            SpeedJ3.Minimum = -maxspeed;
+            SpeedJ4.Maximum = maxspeed;
+            SpeedJ4.Minimum = -maxspeed;
+            SpeedJ5.Maximum = maxspeed;
+            SpeedJ5.Minimum = -maxspeed;
+            SpeedJ6.Maximum = maxspeed;
+            SpeedJ6.Minimum = -maxspeed;
+            SpeedJ7.Maximum = maxspeed;
+            SpeedJ7.Minimum = -maxspeed;
+
+            SpeedX.Maximum = maxspeed;
+            SpeedX.Minimum = -maxspeed;
+            SpeedY.Maximum = maxspeed;
+            SpeedY.Minimum = -maxspeed;
+            SpeedZ.Maximum = maxspeed;
+            SpeedZ.Minimum = -maxspeed;
+
+            //Message Send Timer
             DispatcherTimer dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(UpdateMotors);
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
             dispatcherTimer.Start();
 
+            //Simulation Update Timer
+            DispatcherTimer updateLocation = new DispatcherTimer();
+            updateLocation.Tick += new EventHandler(UpdateLocation);
+            updateLocation.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
+            updateLocation.Start();
+
+
+            //Filling Comport Selector and setup comport
             foreach (string port in SerialPort.GetPortNames())
             {
                 comports.Items.Add(port);
@@ -96,6 +131,45 @@ namespace EOD_WPF
                 ma1.Content = Arduino.ReadChar();
 
             });
+
+
+
+        }
+
+
+        private void UpdateLocation(object sender, EventArgs args)
+        {
+            if((bool)Joint.IsChecked && (bool)Live.IsChecked)
+            {
+                if (Math.Abs(SpeedJ1.Value) > drift) RotationJ1.Value += SpeedJ1.Value;
+                if (Math.Abs(SpeedJ2.Value) > drift) RotationJ2.Value += SpeedJ2.Value;
+                if (Math.Abs(SpeedJ3.Value) > drift) RotationJ3.Value += SpeedJ3.Value;
+                if (Math.Abs(SpeedJ4.Value) > drift) RotationJ4.Value += SpeedJ4.Value;
+                if (Math.Abs(SpeedJ5.Value) > drift) RotationJ5.Value += SpeedJ5.Value;
+                if (Math.Abs(SpeedJ6.Value) > drift) RotationJ6.Value += SpeedJ6.Value;
+                if (Math.Abs(SpeedJ7.Value) > drift) RotationJ7.Value += SpeedJ7.Value;
+
+                franka.joints[1].angle = RotationJ1.Value;
+                franka.joints[2].angle = RotationJ2.Value;
+                franka.joints[3].angle = RotationJ3.Value;
+                franka.joints[4].angle = RotationJ4.Value;
+                franka.joints[5].angle = RotationJ5.Value;
+                franka.joints[6].angle = RotationJ6.Value;
+                franka.joints[7].angle = RotationJ7.Value;
+                franka.execute_fk();
+            }
+
+            else if (!(bool)Joint.IsChecked && (bool)Live.IsChecked)
+            {
+                if (Math.Abs(SpeedX.Value) > drift) SliderX.Value += SpeedX.Value;
+                if (Math.Abs(SpeedY.Value) > drift) SliderY.Value += SpeedY.Value;
+                if (Math.Abs(SpeedZ.Value) > drift) SliderZ.Value += SpeedZ.Value;
+                franka.execute_ik(new Vector3D(SliderX.Value, SliderY.Value, SliderZ.Value));
+            }
+
+            xlabel.Content = $"X: {franka.headPoint.X}";
+            ylabel.Content = $"Y: {franka.headPoint.Y}";
+            zlabel.Content = $"Z: {franka.headPoint.Z}";
         }
 
         private void UpdateMotors(object sender, EventArgs args)
@@ -160,22 +234,6 @@ namespace EOD_WPF
             controller.RightRumble.Rumble((float)FineRumble.Value);
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            franka.joints[1].angle = RotationJ1.Value;
-            franka.joints[2].angle = RotationJ2.Value;
-            franka.joints[3].angle = RotationJ3.Value;
-            franka.joints[4].angle = RotationJ4.Value;
-            franka.joints[5].angle = RotationJ5.Value;
-            franka.joints[6].angle = RotationJ6.Value;
-            franka.joints[7].angle = RotationJ7.Value;
-
-            if ((bool)Live.IsChecked)
-            {
-                franka.execute_fk();
-            }
-        }
-
         private void MapController()
         {
             controller.LeftTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() =>
@@ -194,10 +252,10 @@ namespace EOD_WPF
             controller.LeftThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
                 //XYZ MODE
-                if(controller.LeftShoulder.Value)
+                if((bool)!Joint.IsChecked)
                 {
-                    SliderX.Value = controller.LeftThumbstick.Value.X * RotationJ1.Maximum;
-                    SliderY.Value = controller.LeftThumbstick.Value.Y * RotationJ2.Maximum;
+                    SpeedX.Value =  controller.LeftThumbstick.Value.X * SpeedX.Maximum;
+                    SpeedY.Value =  controller.LeftThumbstick.Value.Y * SpeedY.Maximum;
                 }
                 //JOINT SPACE
                 else
@@ -210,9 +268,9 @@ namespace EOD_WPF
             controller.RightThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
                 //XYZ MODE
-                if (controller.LeftShoulder.Value)
+                if ((bool)!Joint.IsChecked)
                 {
-                    SliderZ.Value = controller.RightThumbstick.Value.Y * RotationJ1.Maximum;
+                    SpeedZ.Value = controller.RightThumbstick.Value.Y * SpeedZ.Maximum;
                 }
                 //JOINT SPACE
                 else
@@ -230,6 +288,15 @@ namespace EOD_WPF
                 }
             });
 
+
+            controller.Back.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                if (controller.Back.Value)
+                {
+                    Joint.IsChecked = !Joint.IsChecked;
+                }
+            });
+
             controller.RightTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
                 if (e.Value >= RightTrigger.Value)
@@ -238,18 +305,20 @@ namespace EOD_WPF
                 }
             });
 
-          
-
             controller.RightShoulder.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
                 RightTrigger.Value = 0;
             });
 
-            controller.Y.ValueChanged += (s, e) => guiDisp.Invoke(() =>
-            {
-                invert = e.Value;
-            });
+            //DPAD
+            controller.Left.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value -= 1; });
+            controller.Right.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value += 1; });
+            controller.Up.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value += 1; });
+            controller.Down.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value -= 1; });
+
+      
         }
+
 
         public int radtodeg(double rad)
         {
@@ -272,11 +341,6 @@ namespace EOD_WPF
             {
                 receiver.Items.Add(this);
             }
-        }
-
-        private void xyz_update(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            franka.execute_ik(new Vector3D(SliderX.Value, SliderY.Value, SliderZ.Value));
         }
 
         private void resetSender(object sender, System.Windows.Input.MouseButtonEventArgs e)
