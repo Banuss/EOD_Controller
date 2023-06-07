@@ -1,10 +1,10 @@
 // Old varaibles for connumication
-// byte buf[2];
-// int newData;
+byte buf[2];
+int newData;
 
-// long current_millis = 0;
-// long prev_millis = 0;
-// int counter = 0;
+long current_millis = 0;
+long prev_millis = 0;
+int counter = 0;
 
 #include "motors.h"
 #include "currentSensors.h"
@@ -68,25 +68,7 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("on");
-  setDirectionMotor1(0);
-  setDirectionMotor2(0);
-  delay(2000);
-  Serial.println("switch");
-  setDirectionMotor1(0);
-  setDirectionMotor2(0);
-  delay(2000);
-  getCurrents();
-}
-
-// void getData() {
-//   if (Serial.available() != 0) {
-//     Serial.readBytes(buf, 3);
-//     newData = true;
-//   }
-// }
-
-// Old code in loop for communication
+  // Communication SEND DATA
   // current_millis = millis();
   // if (current_millis != prev_millis) {
   //   counter ++;
@@ -99,21 +81,53 @@ void loop() {
   //     }
   //   }
   // }
+
+  // Communication GET DATA
+  getData();
+  if (newData == true) {
+    if ((int)buf[0] == 0)
+    {
+      Serial.println("Bit 1 is 0");
+    }
+    if ((int)buf[0]== 1)
+    {
+      Serial.println("Bit 1 is 1");
+    }
+    if ((int)buf[1] == 0)
+    {
+      Serial.println("Bit 2 is 0");
+    }
+    if ((int)buf[1] == 1)
+    {
+      Serial.println("Bit 2 is 1");
+    }
+    newData = false;
+  }
+
+  // Motor setings
+  Serial.println("on");
+  setDirectionMotor1(0);
+  setDirectionMotor2(0);
+  delay(2000);
+  Serial.println("switch");
+  setDirectionMotor1(0);
+  setDirectionMotor2(0);
+  delay(2000);
+  getCurrents();
+}
+
+void getData() {
+  if (Serial.available() != 0) {
+    Serial.readBytes(buf, 3);
+    Serial.println("here");
+    Serial.println((int)buf[0]);
+    newData = true;
+  }
+}
+
+// Old code in loop for communication
+
   //
-  // getData();
-  // if (newData == true) {
-  //   if ((int)buf[0] == 0)
-  //   {
-  //     linservo.write((int)buf[1]);
-  //   }
-  //   if ((int)buf[0]== 1)
-  //   {
-  //     leftservo.write((int)buf[1]);
-  //   }
-  //   if ((int)buf[0] == 2)
-  //   {
-  //     rightservo.write((int)buf[1]);
-  //   }
-  //   newData = false;
-  // }
+  // 
+
 
