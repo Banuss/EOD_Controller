@@ -1,43 +1,92 @@
-#include <Servo.h>
+// Old varaibles for connumication
+// byte buf[2];
+// int newData;
+
+// long current_millis = 0;
+// long prev_millis = 0;
+// int counter = 0;
+
+#include "motors.h"
+#include "currentSensors.h"
+
+#include <Wire.h>
 #include <Adafruit_INA219.h>
 
-#define LEFTSERVOPIN 9 //Orange PWM, RED +5V, Brown GND
-#define RIGHTSERVOPIN 10
-#define LINSERVOPIN 11
 
-Servo leftservo;
-Servo rightservo;
-Servo linservo;
+// Defines
+// Motor A
+#define ENA 32
+#define IN1 33
+#define IN2 25
+//Motor B
+#define IN3 26
+#define IN4 27
+#define ENB 14
 
-Adafruit_INA219 ina219;
+// Encoders
+#define SCL 12
+#define SDA 13
 
-byte buf[2];
-int newData;
+// Current sensors
+#define CS1 34
+#define CS2 35
 
-long current_millis = 0;
-long prev_millis = 0;
-int counter = 0;
+// Variables
 
-
-
-void getData() {
-  if (Serial.available() != 0) {
-    Serial.readBytes(buf, 3);
-    newData = true;
-  }
-}
+// Others
 
 void setup() {
   Serial.begin(115200);       
-  leftservo.attach(LEFTSERVOPIN);
-  rightservo.attach(RIGHTSERVOPIN);
-  linservo.attach(LINSERVOPIN);
-  ina219.begin();
+  
+  // Old code for communication
+  // ina219.begin();
+  // uint32_t currentFrequency;
+
+  // Set pins
+  pinMode(ENA, OUTPUT);
+	pinMode(ENB, OUTPUT);
+	pinMode(IN1, OUTPUT);
+	pinMode(IN2, OUTPUT);
+	pinMode(IN3, OUTPUT);
+	pinMode(IN4, OUTPUT);
+	
+	// Turn off motors - Initial state
+	digitalWrite(IN1, LOW);
+	digitalWrite(IN2, LOW);
+	digitalWrite(IN3, LOW);
+	digitalWrite(IN4, LOW);
+  
+  setSpeedMotor1(255);
+  setSpeedMotor2(255);
+
   uint32_t currentFrequency;
+  if (! ina219.begin()) {
+    Serial.println("Failed to find INA219 chip");
+    while (1) { delay(10); }
+  }
   delay(100);
 }
 
 void loop() {
+  Serial.println("on");
+  setDirectionMotor1(0);
+  setDirectionMotor2(0);
+  delay(2000);
+  Serial.println("switch");
+  setDirectionMotor1(0);
+  setDirectionMotor2(0);
+  delay(2000);
+  getCurrents();
+}
+
+// void getData() {
+//   if (Serial.available() != 0) {
+//     Serial.readBytes(buf, 3);
+//     newData = true;
+//   }
+// }
+
+// Old code in loop for communication
   // current_millis = millis();
   // if (current_millis != prev_millis) {
   //   counter ++;
@@ -50,23 +99,21 @@ void loop() {
   //     }
   //   }
   // }
-
-  getData();
-  if (newData == true) {
-    if ((int)buf[0] == 0)
-    {
-      linservo.write((int)buf[1]);
-    }
-    if ((int)buf[0]== 1)
-    {
-      leftservo.write((int)buf[1]);
-    }
-    if ((int)buf[0] == 2)
-    {
-      rightservo.write((int)buf[1]);
-    }
-    newData = false;
-  }
-}
-
+  //
+  // getData();
+  // if (newData == true) {
+  //   if ((int)buf[0] == 0)
+  //   {
+  //     linservo.write((int)buf[1]);
+  //   }
+  //   if ((int)buf[0]== 1)
+  //   {
+  //     leftservo.write((int)buf[1]);
+  //   }
+  //   if ((int)buf[0] == 2)
+  //   {
+  //     rightservo.write((int)buf[1]);
+  //   }
+  //   newData = false;
+  // }
 
