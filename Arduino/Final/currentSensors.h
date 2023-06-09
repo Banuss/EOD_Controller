@@ -23,3 +23,16 @@ void getCurrents() {
   Serial.print("Power:         "); Serial.print(power_mW); Serial.println(" mW");
   Serial.println("");
 }
+
+float getCurrentMotor1() {
+  float current_mA = 0;
+  current_mA = ina219.getCurrent_mA(); // Wordt analogread
+  return current_mA;
+}
+
+uint8_t getCurrentMotor2() {
+  float current_mA = 0;
+  current_mA = ina219.getCurrent_mA(); // Wordt analogread
+  uint8_t current2 = uint8_t(current_mA);
+  return current2;
+}
