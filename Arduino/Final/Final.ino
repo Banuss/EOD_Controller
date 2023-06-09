@@ -9,6 +9,7 @@ long counter = 0;
 
 #include "motors.h"
 #include "currentSensors.h"
+#include "encoders.h"
 
 #include <Wire.h>
 #include <Adafruit_INA219.h>
@@ -16,13 +17,13 @@ long counter = 0;
 
 // Defines
 // Motor A
-#define ENA 32
-#define IN1 33
-#define IN2 25
+#define ENA 5
+#define IN1 6
+#define IN2 7
 //Motor B
-#define IN3 26
-#define IN4 27
-#define ENB 14
+#define IN3 8
+#define IN4 9
+#define ENB 10
 
 // Encoders
 #define SCL 12
@@ -57,8 +58,8 @@ void setup() {
 	digitalWrite(IN3, LOW);
 	digitalWrite(IN4, LOW);
   
-  setSpeedMotor1(255);
-  setSpeedMotor2(255);
+  setSpeedMotor1(100);
+  setSpeedMotor2(100);
 
   uint32_t currentFrequency;
   if (! ina219.begin()) {
@@ -77,22 +78,27 @@ void loop() {
       counter = 0;
       if (Serial.availableForWrite() != 0) {
         // uint8_t currentMotor1 = getCurrentMotor1();
-        // unsigned int encoderMotor1 = getEncoderMotor1();
-        // uint8_t currentMotor2 = getCurrentMotor2();
-        // unsigned int encoderMotor2 = getEncoderMotor2();
-        uint8_t currentMotor1 = 104;
-        unsigned int encoderMotor1 = 1024;
-        uint8_t currentMotor2 = 105;
-        unsigned int encoderMotor2 = 1025;
+        float currentMotor1placeholder = getCurrentMotor1();
+        float currentMotor2placeholder = getCurrentMotor2();
+        int encoderMotor1placeholder = getEncodervalueMotor1();
+        if (currentMotor1placeholder < 2000 && currentMotor2placeholder < 2000) {
+          // unsigned int encoderMotor1 = getEncoderMotor1();
+          // unsigned int encoderMotor2 = getEncoderMotor2();
 
-        bufSend[0] = currentMotor1;
-        bufSend[1] = encoderMotor1 & 0xFF;
-        bufSend[2] = encoderMotor1 >> 8;
-        bufSend[3] = currentMotor2;
-        bufSend[4] = encoderMotor2 & 0xFF;
-        bufSend[5] = encoderMotor2 >> 8;
-        Serial.write(bufSend,6);
-        //Serial.println(current_mA);
+          uint8_t currentMotor1 = 104;      // Float to uint8_t
+          unsigned int encoderMotor1 = 1024;
+          uint8_t currentMotor2 = 105;      // Float to uint8_t
+          unsigned int encoderMotor2 = 1025;
+
+          bufSend[0] = currentMotor1;
+          bufSend[1] = encoderMotor1 & 0xFF;
+          bufSend[2] = encoderMotor1 >> 8;
+          bufSend[3] = currentMotor2;
+          bufSend[4] = encoderMotor2 & 0xFF;
+          bufSend[5] = encoderMotor2 >> 8;
+          //Serial.write(bufSend,6);
+        }
+        
         prev_millis = current_millis;
       }
     }
@@ -106,7 +112,7 @@ void loop() {
     auto dir = bitRead(buf[0],1);
     auto emer = bitRead(buf[0],2);
     auto speed = buf[1];
-    Serial.println("id = " + String(motorid) + " dir: " + String(dir) + " Emergency: " String(emer) + " speed: " + String(speed));
+    Serial.println("id = " + String(motorid) + " dir: " + String(dir) + " Emergency: " + String(emer) + " speed: " + String(speed));
     
     // for (int i = 0; i++; i<8) {
     //   Serial.println(i);
@@ -118,8 +124,8 @@ void loop() {
 
   // Motor setings
   // Serial.println("on");
-  // setDirectionMotor1(0);
-  // setDirectionMotor2(0);
+  setDirectionMotor1(1);
+  setDirectionMotor2(1);
   // delay(2000);
   // Serial.println("switch");
   // setDirectionMotor1(0);
