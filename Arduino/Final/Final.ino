@@ -58,8 +58,8 @@ void setup() {
 	digitalWrite(IN3, LOW);
 	digitalWrite(IN4, LOW);
   
-  setSpeedMotor1(100);
-  setSpeedMotor2(100);
+  setSpeedMotor1(80);
+  setSpeedMotor2(80);
 
   uint32_t currentFrequency;
   if (! ina219.begin()) {
@@ -78,25 +78,34 @@ void loop() {
       counter = 0;
       if (Serial.availableForWrite() != 0) {
         // uint8_t currentMotor1 = getCurrentMotor1();
-        float currentMotor1placeholder = getCurrentMotor1();
-        float currentMotor2placeholder = getCurrentMotor2();
-        int encoderMotor1placeholder = getEncodervalueMotor1();
-        if (currentMotor1placeholder < 2000 && currentMotor2placeholder < 2000) {
-          // unsigned int encoderMotor1 = getEncoderMotor1();
-          // unsigned int encoderMotor2 = getEncoderMotor2();
+        int currentMotor1 = getCurrentMotor1();
+        if (currentMotor1 < 70) {
+          currentMotor1 = 0;
+        }
+        else {
+          currentMotor1 = map(currentMotor1,70, 1300, 1, 255);
+        }
+        int currentMotor2 = getCurrentMotor2();
+        if (currentMotor2 < 70) {
+          currentMotor2 = 0;
+        }
+        else {
+          currentMotor2 = map(currentMotor2,70, 1300, 1, 255);
+        }
+        if (currentMotor1 < 2000 && currentMotor2 < 2000) {
+          unsigned int encoderMotor1 = getEncodervalueMotor1();
+          //unsigned int encoderMotor2 = getEncodervalueMotor2();
 
-          uint8_t currentMotor1 = 104;      // Float to uint8_t
-          unsigned int encoderMotor1 = 1024;
-          uint8_t currentMotor2 = 105;      // Float to uint8_t
+          // unsigned int encoderMotor1 = 1024;
           unsigned int encoderMotor2 = 1025;
 
-          bufSend[0] = currentMotor1;
-          bufSend[1] = encoderMotor1 & 0xFF;
-          bufSend[2] = encoderMotor1 >> 8;
-          bufSend[3] = currentMotor2;
-          bufSend[4] = encoderMotor2 & 0xFF;
-          bufSend[5] = encoderMotor2 >> 8;
-          //Serial.write(bufSend,6);
+          bufSend[0] = char(currentMotor1);
+          bufSend[1] = char(encoderMotor1 & 0xFF);
+          bufSend[2] = char(encoderMotor1 >> 8);
+          bufSend[3] = char(currentMotor2);
+          bufSend[4] = char(encoderMotor2 & 0xFF);
+          bufSend[5] = char(encoderMotor2 >> 8);
+          Serial.write(bufSend,6);
         }
         
         prev_millis = current_millis;

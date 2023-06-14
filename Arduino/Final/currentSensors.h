@@ -115,13 +115,13 @@ float getCurrentMotor1() {
 
   // Compute the filtered signal
   float yn = lp.filt(xn);
-
+  int currentValue = yn;
   // Output
   //Serial.print(xn);
   //Serial.print(" ");
-  Serial.print(yn);
-  Serial.println();
-  return yn;
+  //Serial.print(yn);
+  //Serial.println();
+  return currentValue;
 
   // 0-70 no load
   // low speed max ~100
