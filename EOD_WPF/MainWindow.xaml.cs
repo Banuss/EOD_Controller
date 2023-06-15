@@ -11,6 +11,7 @@ using EOD_WPF.Model;
 using EOD_WPF.Remote;
 using System.Windows.Media.Media3D;
 using System.Security.Cryptography.X509Certificates;
+using System.Runtime.Versioning;
 
 namespace EOD_WPF
 {
@@ -27,6 +28,7 @@ namespace EOD_WPF
         Dispatcher guiDisp = Application.Current.Dispatcher;
         int maxspeed = 1;
         double drift = 0.5;
+        byte[] message;
 
         bool hold_A;
 
@@ -43,7 +45,6 @@ namespace EOD_WPF
             };
 
             Arduino.ErrorReceived += (s, e) => guiDisp.Invoke(() => { new LogItem($"Error {e}").print(log); });
-
 
             //Lock Joint 3
             RotationJ3.IsEnabled = false;
@@ -100,12 +101,7 @@ namespace EOD_WPF
             dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
             dispatcherTimer.Start();
 
-            //Simulation Update Timer
-            DispatcherTimer updateLocation = new DispatcherTimer();
-            updateLocation.Tick += new EventHandler(UpdateLocation);
-            updateLocation.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
-            updateLocation.Start();
-
+            
 
             //Filling Comport Selector and setup comport
             foreach (string port in SerialPort.GetPortNames())
@@ -132,14 +128,40 @@ namespace EOD_WPF
 
             });
 
+            franka.execute_fk();
 
+            //Simulation Update Timer
+            DispatcherTimer updateLocation = new DispatcherTimer();
+            updateLocation.Tick += new EventHandler(UpdateLocation);
+            updateLocation.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
+            updateLocation.Start();
+        }
 
+  
+
+        private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            if (!Arduino.IsOpen) return;  //If port is closed exit
+            int bytes = Arduino.BytesToRead;  //find the size of the array needed
+            byte[] buffer = new byte[bytes];  //create the array
+            Arduino.Read(buffer, 0, bytes);  //read the message and save it into the buffer
+            byte[] ReceivedMessage = new byte[bytes];  //create an array of the same size
+            Array.Copy(buffer, ReceivedMessage, bytes);  //copy it across
+            controller.LeftRumble.Value = (1 / 255) * ReceivedMessage[0];
         }
 
 
         private void UpdateLocation(object sender, EventArgs args)
         {
-            if((bool)Joint.IsChecked && (bool)Live.IsChecked)
+
+            xlabel.Content = $"X: {franka.headPoint.X.ToString("N0")}";
+            ylabel.Content = $"Y: {franka.headPoint.Y.ToString("N0")}";
+            zlabel.Content = $"Z: {franka.headPoint.Z.ToString("N0")}";
+            xball.Content = $"X: {franka.reachingPoint.X.ToString("N0")}";
+            yball.Content = $"Y: {franka.reachingPoint.Y.ToString("N0")}";
+            zball.Content = $"Z: {franka.reachingPoint.Z.ToString("N0")}";
+
+            if ((bool)Joint.IsChecked && (bool)Live.IsChecked)
             {
                 if (Math.Abs(SpeedJ1.Value) > drift) RotationJ1.Value += SpeedJ1.Value;
                 if (Math.Abs(SpeedJ2.Value) > drift) RotationJ2.Value += SpeedJ2.Value;
@@ -161,23 +183,19 @@ namespace EOD_WPF
 
             else if (!(bool)Joint.IsChecked && (bool)Live.IsChecked)
             {
-                if (Math.Abs(SpeedX.Value) > drift) SliderX.Value += SpeedX.Value;
-                if (Math.Abs(SpeedY.Value) > drift) SliderY.Value += SpeedY.Value;
-                if (Math.Abs(SpeedZ.Value) > drift) SliderZ.Value += SpeedZ.Value;
+                if (Math.Abs(SpeedX.Value) > drift) SliderX.Value += SpeedX.Value * 5;
+                if (Math.Abs(SpeedY.Value) > drift) SliderY.Value += SpeedY.Value * 5;
+                if (Math.Abs(SpeedZ.Value) > drift) SliderZ.Value += SpeedZ.Value * 5;
                 franka.execute_ik(new Vector3D(SliderX.Value, SliderY.Value, SliderZ.Value));
             }
-
-            xlabel.Content = $"X: {franka.headPoint.X}";
-            ylabel.Content = $"Y: {franka.headPoint.Y}";
-            zlabel.Content = $"Z: {franka.headPoint.Z}";
         }
 
         private void UpdateMotors(object sender, EventArgs args)
         {
             if (Arduino.IsOpen)
             {
-                SendMotor(1, (int)(LeftTrigger.Value * 180));
-                SendMotor(2, (int)(RightTrigger.Value * 180));
+                SendMotor(1, (int)(LeftTrigger.Value * 255));
+                SendMotor(2, (int)(RightTrigger.Value * 255));
             }
         }
 
@@ -185,7 +203,7 @@ namespace EOD_WPF
         {
             try
             {
-                byte[] par1 = new byte[] { motor };
+                byte[] par1 = new byte[] {1,0,1};
                 byte[] msg = par1.Concat(BitConverter.GetBytes((char)speed)).ToArray();
                 Arduino.Write(msg, 0, 2);
             }
@@ -211,10 +229,16 @@ namespace EOD_WPF
             try
             {
                 Arduino.BaudRate = 115200;
-                Arduino.ReadTimeout = 300;
+                //Arduino.ReadTimeout = 300;
                 Arduino.PortName = port;
+                Arduino.DataBits = 8;
+                Arduino.StopBits = StopBits.One;
+                Arduino.Parity = Parity.None;
+                Arduino.Handshake = Handshake.None;
+                Arduino.ReadTimeout = 100;
                 Arduino.Open();
-                Arduino.ReceivedBytesThreshold = 20;
+                Arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+
                 new LogItem($"Connection established on {port}").print(log);
             }
             catch (Exception ex)

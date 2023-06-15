@@ -38,6 +38,7 @@ namespace EOD_WPF.Model
         Transform3DGroup F6;
         Transform3DGroup F7;
         Transform3DGroup F8;
+        Transform3DGroup G;
         RotateTransform3D R;
         TranslateTransform3D T;
 
@@ -83,6 +84,7 @@ namespace EOD_WPF.Model
         public void execute_ik(Vector3D reachingPoint)
         {
             newLocCircle.Transform = new TranslateTransform3D(reachingPoint);
+            this.reachingPoint = reachingPoint;
             double[] angles = { joints[0].angle, joints[1].angle, joints[2].angle, joints[3].angle, joints[4].angle, joints[5].angle, joints[6].angle, joints[7].angle };
             angles = InverseKinematics(reachingPoint, angles);
             joints[0].angle = angles[0];
@@ -208,6 +210,7 @@ namespace EOD_WPF.Model
                 RA.Children.Add(joints[6].model);
                 RA.Children.Add(joints[7].model);
 
+                //base
                 joints[0].rotAxisX = 0;
                 joints[0].rotAxisY = 0;
                 joints[0].rotAxisZ = 0;
@@ -222,7 +225,7 @@ namespace EOD_WPF.Model
                 joints[1].rotAxisZ = 1;
                 joints[1].rotPointX = 0;
                 joints[1].rotPointY = 0;
-                joints[1].rotPointZ = 0;
+                joints[1].rotPointZ = 333;
 
                 joints[2].angleMax = RadToDeg(1.7628);
                 joints[2].angleMin = RadToDeg(-1.7628);
@@ -240,7 +243,7 @@ namespace EOD_WPF.Model
                 joints[3].rotAxisZ = 1;
                 joints[3].rotPointX = 0;
                 joints[3].rotPointY = 0;
-                joints[3].rotPointZ = 0;
+                joints[3].rotPointZ = 649;
 
                 joints[4].angleMax = RadToDeg(-0.0698);
                 joints[4].angleMin = RadToDeg(-3.0718);
@@ -258,7 +261,7 @@ namespace EOD_WPF.Model
                 joints[5].rotAxisZ = 1;
                 joints[5].rotPointX = 0;
                 joints[5].rotPointY = 0;
-                joints[5].rotPointZ = 0;
+                joints[5].rotPointZ = 1033;
 
                 joints[6].angleMax = RadToDeg(3.7525);
                 joints[6].angleMin = RadToDeg(-0.0175);
@@ -268,7 +271,7 @@ namespace EOD_WPF.Model
                 joints[6].rotPointX = 0;
                 joints[6].rotPointY = 0;
                 joints[6].rotPointZ = 1033;
-                
+
                 joints[7].angleMax = RadToDeg(2.8973);
                 joints[7].angleMin = RadToDeg(-2.8973);
                 joints[7].rotAxisX = 0;
@@ -276,7 +279,8 @@ namespace EOD_WPF.Model
                 joints[7].rotAxisZ = 1;
                 joints[7].rotPointX = 0;
                 joints[7].rotPointY = 88;
-                joints[7].rotPointZ = 0;
+                joints[7].rotPointZ = 926;
+
             }
             catch (Exception e)
             {
