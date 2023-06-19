@@ -122,7 +122,14 @@ void loop() {
     auto emer = bitRead(buf[0],2);
     auto speed = buf[1];
     Serial.println("id = " + String(motorid) + " dir: " + String(dir) + " Emergency: " + String(emer) + " speed: " + String(speed));
-    
+    if (id == 1) {
+      setDirectionMotor1(dir);
+      setSpeedMotor1(speed);
+    }
+    else {
+      setDirectionMotor2(dir);
+      setSpeedMotor2(speed);
+    }
     // for (int i = 0; i++; i<8) {
     //   Serial.println(i);
     //   Serial.println(bitRead(buf[0], i));
