@@ -1,74 +1,161 @@
-#include <Servo.h>
+// Old varaibles for connumication
+uint8_t buf[2]; //incoming
+uint8_t bufSend[6]; //incoming
+
+int newData;
+long current_millis = 0;
+long prev_millis = 0;
+long counter = 0;
+
+#include "motors.h"
+#include "currentSensors.h"
+#include "encoders.h"
+
+#include <Wire.h>
 #include <Adafruit_INA219.h>
 
 
+// Defines
+// Motor A
+#define ENA 5
+#define IN1 6
+#define IN2 7
+//Motor B
+#define IN3 8
+#define IN4 9
+#define ENB 10
 
-#define LEFTSERVOPIN 9 //Orange PWM, RED +5V, Brown GND
-#define RIGHTSERVOPIN 10
-#define LINSERVOPIN 11
+// Encoders
+#define SCL 12
+#define SDA 13
 
-Servo leftservo;
-Servo rightservo;
-Servo linservo;
+// Current sensors
+#define CS1 34
+#define CS2 35
 
-Adafruit_INA219 ina219;
+// Variables
 
-byte buf[2];
-int newData;
-
-long current_millis = 0;
-long prev_millis = 0;
-int counter = 0;
-
-
-
-void getData() {
-  if (Serial.available() != 0) {
-    Serial.readBytes(buf, 3);
-    newData = true;
-  }
-}
+// Others
 
 void setup() {
   Serial.begin(115200);       
-  leftservo.attach(LEFTSERVOPIN);
-  rightservo.attach(RIGHTSERVOPIN);
-  linservo.attach(LINSERVOPIN);
-  ina219.begin();
+  
+  // Old code for communication
+  // ina219.begin();
+  // uint32_t currentFrequency;
+
+  // Set pins
+  pinMode(ENA, OUTPUT);
+	pinMode(ENB, OUTPUT);
+	pinMode(IN1, OUTPUT);
+	pinMode(IN2, OUTPUT);
+	pinMode(IN3, OUTPUT);
+	pinMode(IN4, OUTPUT);
+	
+	// Turn off motors - Initial state
+	digitalWrite(IN1, LOW);
+	digitalWrite(IN2, LOW);
+	digitalWrite(IN3, LOW);
+	digitalWrite(IN4, LOW);
+  
+  setSpeedMotor1(80);
+  setSpeedMotor2(80);
+
   uint32_t currentFrequency;
+  if (! ina219.begin()) {
+    Serial.println("Failed to find INA219 chip");
+    while (1) { delay(10); }
+  }
   delay(100);
 }
 
 void loop() {
-  // current_millis = millis();
-  // if (current_millis != prev_millis) {
-  //   counter ++;
-  //   if (counter > 100) counter = 0;{
-  //     if (Serial.available() != 0) {
-  //       float current_mA = 0;
-  //       current_mA = ina219.getCurrent_mA();
-  //       //Serial.println(current_mA);
-  //       prev_millis = current_millis;
-  //     }
-  //   }
-  // }
+  // Communication SEND DATA
+  current_millis = millis();
+  if (current_millis != prev_millis) {
+    counter ++;
+    if (counter > 1000) {
+      counter = 0;
+      if (Serial.availableForWrite() != 0) {
+        // uint8_t currentMotor1 = getCurrentMotor1();
+        int currentMotor1 = getCurrentMotor1();
+        if (currentMotor1 < 70) {
+          currentMotor1 = 0;
+        }
+        else {
+          currentMotor1 = map(currentMotor1,70, 1300, 1, 255);
+        }
+        int currentMotor2 = getCurrentMotor2();
+        if (currentMotor2 < 70) {
+          currentMotor2 = 0;
+        }
+        else {
+          currentMotor2 = map(currentMotor2,70, 1300, 1, 255);
+        }
+        if (currentMotor1 < 2000 && currentMotor2 < 2000) {
+          unsigned int encoderMotor1 = getEncodervalueMotor1();
+          //unsigned int encoderMotor2 = getEncodervalueMotor2();
 
+          // unsigned int encoderMotor1 = 1024;
+          unsigned int encoderMotor2 = 1025;
+
+          bufSend[0] = char(currentMotor1);
+          bufSend[1] = char(encoderMotor1 & 0xFF);
+          bufSend[2] = char(encoderMotor1 >> 8);
+          bufSend[3] = char(currentMotor2);
+          bufSend[4] = char(encoderMotor2 & 0xFF);
+          bufSend[5] = char(encoderMotor2 >> 8);
+          Serial.write(bufSend,6);
+        }
+        
+        prev_millis = current_millis;
+      }
+    }
+  }
+
+  // Communication GET DATA
   getData();
   if (newData == true) {
-    if ((int)buf[0] == 0)
-    {
-      linservo.write((int)buf[1]);
+    //uint8_t motorid = buf[0];
+    auto motorid = bitRead(buf[0],0);
+    auto dir = bitRead(buf[0],1);
+    auto emer = bitRead(buf[0],2);
+    auto speed = buf[1];
+    Serial.println("id = " + String(motorid) + " dir: " + String(dir) + " Emergency: " + String(emer) + " speed: " + String(speed));
+    if (id == 1) {
+      setDirectionMotor1(dir);
+      setSpeedMotor1(speed);
     }
-    if ((int)buf[0]== 1)
-    {
-      leftservo.write((int)buf[1]);
+    else {
+      setDirectionMotor2(dir);
+      setSpeedMotor2(speed);
     }
-    if ((int)buf[0] == 2)
-    {
-      rightservo.write((int)buf[1]);
-    }
+    // for (int i = 0; i++; i<8) {
+    //   Serial.println(i);
+    //   Serial.println(bitRead(buf[0], i));
+    // }
+    
     newData = false;
   }
+
+  // Motor setings
+  // Serial.println("on");
+  setDirectionMotor1(1);
+  setDirectionMotor2(1);
+  // delay(2000);
+  // Serial.println("switch");
+  // setDirectionMotor1(0);
+  // setDirectionMotor2(0);
+  // delay(2000);
+  // getCurrents();
 }
 
+void getData() {
+  if (Serial.available() != 0) {
+    Serial.readBytes(buf, 2);
+    Serial.println("here");
+    //Serial.println(buf[0]);
+    newData = true;
+  }
+}
 
