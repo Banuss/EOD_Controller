@@ -1,7 +1,8 @@
 #include <Wire.h>
 #include <Adafruit_INA219.h>
 
-Adafruit_INA219 ina219;
+Adafruit_INA219 ina219(0x40);
+Adafruit_INA219 ina219_2(0x41);
 
 template <int order> // order is 1 or 2
 class LowPass
@@ -110,18 +111,13 @@ void getCurrents() {
 
 float getCurrentMotor1() {
   float xn = ina219.getCurrent_mA();
-  xn = xn * -1;
-  //float xn = (analogValue*5.0/1023.0 - 2.503)/0.185*1000;
+  // xn = xn * -1;
 
-  // Compute the filtered signal
-  float yn = lp.filt(xn);
-  int currentValue = yn;
+  // // Compute the filtered signal
+  // float yn = lp.filt(xn);
+  //int currentValue = yn;
   // Output
-  //Serial.print(xn);
-  //Serial.print(" ");
-  //Serial.print(yn);
-  //Serial.println();
-  return currentValue;
+  return xn;
 
   // 0-70 no load
   // low speed max ~100
@@ -130,9 +126,18 @@ float getCurrentMotor1() {
 }
 
 uint8_t getCurrentMotor2() {
-  float current_mA = 0;
-  current_mA = ina219.getCurrent_mA(); // Wordt analogread
-  uint8_t current2 = uint8_t(current_mA);
-  return current2;
+  float xn = ina219_2.getCurrent_mA();
+  // xn = xn * -1;
+
+  // // Compute the filtered signal
+  // float yn = lp.filt(xn);
+  //int currentValue = yn;
+  // Output
+  return xn;
+
+  // 0-70 no load
+  // low speed max ~100
+  // high speed max ~1200
+  // Reject all above 2000
 }
 

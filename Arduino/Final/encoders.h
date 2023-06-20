@@ -7,3 +7,10 @@ int getEncodervalueMotor1 () {
   //Serial.println(as5600.readAngle());
   return encoderValue;
 }
+
+int getEncodervalueMotor2 () {
+  //int encoderValue = analogRead(A1); //as5600_2.readAngle();
+  int encoderValue = 101;
+  //Serial.println(as5600.readAngle());
+  return encoderValue;
+}
