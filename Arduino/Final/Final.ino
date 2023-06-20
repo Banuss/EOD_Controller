@@ -58,19 +58,16 @@ void setup() {
 	digitalWrite(IN3, LOW);
 	digitalWrite(IN4, LOW);
   
-  setSpeedMotor1(80);
-  setSpeedMotor2(80);
 
   uint32_t currentFrequency;
   if (! ina219.begin()) {
-    Serial.println("Failed to find INA219 chip");
     while (1) { delay(10); }
   }
   delay(100);
 }
 
 void loop() {
-  // Communication SEND DATA
+  //Communication SEND DATA
   current_millis = millis();
   if (current_millis != prev_millis) {
     counter ++;
@@ -113,49 +110,32 @@ void loop() {
     }
   }
 
-  // Communication GET DATA
-  getData();
-  if (newData == true) {
-    //uint8_t motorid = buf[0];
-    auto motorid = bitRead(buf[0],0);
-    auto dir = bitRead(buf[0],1);
-    auto emer = bitRead(buf[0],2);
-    auto speed = buf[1];
-    Serial.println("id = " + String(motorid) + " dir: " + String(dir) + " Emergency: " + String(emer) + " speed: " + String(speed));
-    if (id == 1) {
-      setDirectionMotor1(dir);
-      setSpeedMotor1(speed);
-    }
-    else {
-      setDirectionMotor2(dir);
-      setSpeedMotor2(speed);
-    }
-    // for (int i = 0; i++; i<8) {
-    //   Serial.println(i);
-    //   Serial.println(bitRead(buf[0], i));
-    // }
-    
-    newData = false;
-  }
-
-  // Motor setings
-  // Serial.println("on");
-  setDirectionMotor1(1);
-  setDirectionMotor2(1);
-  // delay(2000);
-  // Serial.println("switch");
-  // setDirectionMotor1(0);
-  // setDirectionMotor2(0);
-  // delay(2000);
-  // getCurrents();
-}
-
-void getData() {
+  //RECEIVE DATA FROM GUI (MOTOR SPEED)
   if (Serial.available() != 0) {
     Serial.readBytes(buf, 2);
-    Serial.println("here");
-    //Serial.println(buf[0]);
     newData = true;
   }
-}
 
+  if (newData == true) {
+    bool motorid = bitRead(buf[0],0);
+    bool dir = bitRead(buf[0],1);
+    bool emer = bitRead(buf[0],2);
+    auto speed = buf[1];
+
+    if (!motorid && !emer) {
+      setDirectionMotor1((dir)?1:2);
+      setSpeedMotor1(speed);
+    }
+    else if (motorid && !emer){
+      setDirectionMotor2((dir)?1:2);
+      setSpeedMotor2(speed);
+    }
+    if(emer){
+      setDirectionMotor1(0);
+      setDirectionMotor2(0);
+      setSpeedMotor1(0);
+      setSpeedMotor2(0);
+    }
+    newData = false;
+  }
+}

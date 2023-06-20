@@ -43,7 +43,7 @@ namespace EOD_WPF.Model
 
         double LearningRate = 0.1;
         double SamplingDistance = 0.15;
-        double DistanceThreshold = 5;
+        double DistanceThreshold = 20;
         int movements = 10;
 
         public Franka(HelixViewport3D viewPort3d)
@@ -182,7 +182,6 @@ namespace EOD_WPF.Model
                 joints[7].rotPointY = 88;
                 joints[7].rotPointZ = 926;
 
-                join
 
             }
             catch (Exception e)

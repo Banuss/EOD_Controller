@@ -12,6 +12,10 @@ using EOD_WPF.Remote;
 using System.Windows.Media.Media3D;
 using System.Security.Cryptography.X509Certificates;
 using System.Runtime.Versioning;
+using System.Reactive;
+using System.Collections;
+using System.Windows.Documents;
+using System.Windows.Media.Converters;
 
 namespace EOD_WPF
 {
@@ -28,9 +32,13 @@ namespace EOD_WPF
         Dispatcher guiDisp = Application.Current.Dispatcher;
         int maxspeed = 1;
         double drift = 0.5;
-        byte[] message;
+        byte[] message = new byte[6];
 
-        bool hold_A;
+        bool backward1 = false;
+        bool backward2 = false;
+
+        int encoder1 = 0;
+        int encoder2 = 0;
 
         public MainWindow()
         {
@@ -101,7 +109,11 @@ namespace EOD_WPF
             dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
             dispatcherTimer.Start();
 
-            
+            DispatcherTimer dispatcherTimerUI = new DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(UpdateUI);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 50); //100Hz
+            dispatcherTimer.Start();
+
 
 
             //Filling Comport Selector and setup comport
@@ -123,12 +135,7 @@ namespace EOD_WPF
                 DisplayMemberBinding = new Binding("Message")
             });
 
-            Arduino.DataReceived += (s, e) => guiDisp.Invoke(() => 
-            {
-                ma1.Content = Arduino.ReadChar();
-
-            });
-
+         
             franka.ForwardKinematics(franka.joints.Select(x => x.angle).ToArray());
 
             //Simulation Update Timer
@@ -136,24 +143,14 @@ namespace EOD_WPF
             updateLocation.Tick += new EventHandler(UpdateLocation);
             updateLocation.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
             updateLocation.Start();
-
-
-            //DispatcherTimer animateTimer = new DispatcherTimer();
-            //dispatcherTimer.Tick += new EventHandler(updateModel);
-            //dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 5); //200Hz
         }
 
   
 
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (!Arduino.IsOpen) return;  //If port is closed exit
-            int bytes = Arduino.BytesToRead;  //find the size of the array needed
-            byte[] buffer = new byte[bytes];  //create the array
-            Arduino.Read(buffer, 0, bytes);  //read the message and save it into the buffer
-            byte[] ReceivedMessage = new byte[bytes];  //create an array of the same size
-            Array.Copy(buffer, ReceivedMessage, bytes);  //copy it across
-            controller.LeftRumble.Value = (1 / 255) * ReceivedMessage[0];
+            if (!Arduino.IsOpen) return;   //If port is closed exit
+            Arduino.Read(message, 0, 6);
         }
 
 
@@ -197,40 +194,37 @@ namespace EOD_WPF
            
         }
 
-        private void updateModel()
-        {
-            //double[] angles = franka.joints.Select(x => x.angle).ToArray();
-            //angles = InverseKinematics(reachingPoint, angles);
-            //joint1.Value = joints[0].angle = angles[0];
-            //joint2.Value = joints[1].angle = angles[1];
-            //joint3.Value = joints[2].angle = angles[2];
-            //joint4.Value = joints[3].angle = angles[3];
-            //joint5.Value = joints[4].angle = angles[4];
-            //joint6.Value = joints[5].angle = angles[5];
-
-            //if ((--movements) <= 0)
-            //{
-            //    button.Content = "Go to position";
-            //    isAnimating = false;
-            //    timer1.Stop();
-            //}
-        }
 
         private void UpdateMotors(object sender, EventArgs args)
         {
             if (Arduino.IsOpen)
             {
-                SendMotor(1, (int)(LeftTrigger.Value * 255));
-                SendMotor(2, (int)(RightTrigger.Value * 255));
+                SendMotor(false, backward1, false, (int)(LeftTrigger.Value * 255));
+                SendMotor(true, backward2, false, (int)(RightTrigger.Value * 255));
             }
         }
 
-        private void SendMotor(byte motor, int speed)
+        private void UpdateUI(object sender, EventArgs args)
+        {
+            encoder1 = BitConverter.ToInt16(message, 1);
+            encoder2 = BitConverter.ToInt16(message, 4);
+            ro1.Content = $"CH1:{encoder1}";
+            ro2.Content = $"CH2:{encoder2}";
+            ma1.Content = $"CH1:{(int)message[0]}";
+            ma2.Content = $"CH2:{(int)message[3]}";
+        }
+
+        private void SendMotor(bool id, bool dir, bool ebrake, int speed)
         {
             try
             {
-                byte[] par1 = new byte[] {1,0,1};
-                byte[] msg = par1.Concat(BitConverter.GetBytes((char)speed)).ToArray();
+                byte[] msg = new byte[2];
+                var bitArray = new BitArray(8);
+                bitArray.Set(0, id);
+                bitArray.Set(1, dir);
+                bitArray.Set(2, ebrake);
+                bitArray.CopyTo(msg,0);
+                msg[1] = ((byte)(speed));
                 Arduino.Write(msg, 0, 2);
             }
             catch (Exception ex)
@@ -338,6 +332,15 @@ namespace EOD_WPF
                 }
             });
 
+            controller.X.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                if (controller.X.Value)
+                {
+                    backward1 = !backward1;
+                    backward2 = !backward2;
+                }
+            });
+
 
             controller.Back.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
@@ -353,6 +356,11 @@ namespace EOD_WPF
                 {
                     RightTrigger.Value = e.Value;
                 }
+            });
+
+            controller.LeftShoulder.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                LeftTrigger.Value = 0;
             });
 
             controller.RightShoulder.ValueChanged += (s, e) => guiDisp.Invoke(() =>
