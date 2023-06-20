@@ -103,6 +103,7 @@ namespace EOD_WPF
 
             
 
+
             //Filling Comport Selector and setup comport
             foreach (string port in SerialPort.GetPortNames())
             {
@@ -128,13 +129,18 @@ namespace EOD_WPF
 
             });
 
-            franka.execute_fk();
+            franka.ForwardKinematics(franka.joints.Select(x => x.angle).ToArray());
 
             //Simulation Update Timer
             DispatcherTimer updateLocation = new DispatcherTimer();
             updateLocation.Tick += new EventHandler(UpdateLocation);
             updateLocation.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
             updateLocation.Start();
+
+
+            //DispatcherTimer animateTimer = new DispatcherTimer();
+            //dispatcherTimer.Tick += new EventHandler(updateModel);
+            //dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 5); //200Hz
         }
 
   
@@ -153,7 +159,6 @@ namespace EOD_WPF
 
         private void UpdateLocation(object sender, EventArgs args)
         {
-
             xlabel.Content = $"X: {franka.headPoint.X.ToString("N0")}";
             ylabel.Content = $"Y: {franka.headPoint.Y.ToString("N0")}";
             zlabel.Content = $"Z: {franka.headPoint.Z.ToString("N0")}";
@@ -178,7 +183,7 @@ namespace EOD_WPF
                 franka.joints[5].angle = RotationJ5.Value;
                 franka.joints[6].angle = RotationJ6.Value;
                 franka.joints[7].angle = RotationJ7.Value;
-                franka.execute_fk();
+                 franka.ForwardKinematics(franka.joints.Select(x => x.angle).ToArray());
             }
 
             else if (!(bool)Joint.IsChecked && (bool)Live.IsChecked)
@@ -186,8 +191,29 @@ namespace EOD_WPF
                 if (Math.Abs(SpeedX.Value) > drift) SliderX.Value += SpeedX.Value * 5;
                 if (Math.Abs(SpeedY.Value) > drift) SliderY.Value += SpeedY.Value * 5;
                 if (Math.Abs(SpeedZ.Value) > drift) SliderZ.Value += SpeedZ.Value * 5;
-                franka.execute_ik(new Vector3D(SliderX.Value, SliderY.Value, SliderZ.Value));
+                franka.updatecircle(new Vector3D(SliderX.Value, SliderY.Value, SliderZ.Value));
+                franka.InverseKinematics();
             }
+           
+        }
+
+        private void updateModel()
+        {
+            //double[] angles = franka.joints.Select(x => x.angle).ToArray();
+            //angles = InverseKinematics(reachingPoint, angles);
+            //joint1.Value = joints[0].angle = angles[0];
+            //joint2.Value = joints[1].angle = angles[1];
+            //joint3.Value = joints[2].angle = angles[2];
+            //joint4.Value = joints[3].angle = angles[3];
+            //joint5.Value = joints[4].angle = angles[4];
+            //joint6.Value = joints[5].angle = angles[5];
+
+            //if ((--movements) <= 0)
+            //{
+            //    button.Content = "Go to position";
+            //    isAnimating = false;
+            //    timer1.Stop();
+            //}
         }
 
         private void UpdateMotors(object sender, EventArgs args)
@@ -339,8 +365,6 @@ namespace EOD_WPF
             controller.Right.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value += 1; });
             controller.Up.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value += 1; });
             controller.Down.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value -= 1; });
-
-      
         }
 
 
@@ -371,5 +395,7 @@ namespace EOD_WPF
         {
             ((Slider)sender).Value = 0;
         }
+
+        
     }
 }
