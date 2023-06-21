@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_INA219.h>
 
-Adafruit_INA219 ina219(0x40);
+Adafruit_INA219 ina219;
 Adafruit_INA219 ina219_2(0x41);
 
 template <int order> // order is 1 or 2
