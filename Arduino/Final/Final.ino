@@ -14,7 +14,6 @@ long counter = 0;
 #include <Wire.h>
 #include <Adafruit_INA219.h>
 
-
 // Defines
 // Motor A
 #define ENA 5
@@ -38,7 +37,8 @@ long counter = 0;
 // Others
 
 void setup() {
-  Serial.begin(115200);       
+  Serial.begin(115200);  
+  memset(bufSend, 0, 6);     
   
   // Old code for communication
   // ina219.begin();
@@ -60,11 +60,11 @@ void setup() {
 
   uint32_t currentFrequency;
   if (! ina219.begin()) {
-    Serial.println("Failed to find INA219 chip 1");
+    //Serial.println("Failed to find INA219 chip 1");
     while (1) { delay(10); }
   }
   if (! ina219_2.begin()) {
-    Serial.println("Failed to find INA219 chip 2");
+    //Serial.println("Failed to find INA219 chip 2");
     while (1) { delay(10); }
   }
   delay(100);
@@ -72,53 +72,32 @@ void setup() {
 
 void loop() {
   // Communication SEND DATA
-
   current_millis = millis();
   if (current_millis != prev_millis) {
     counter ++;
-    if (counter > 1000) {
+    if (counter > 30) {
       counter = 0;
-      if (Serial.availableForWrite() != 0) {
-        Serial.println("--");
-        int currentMotor1 = getCurrentMotor1();
-        Serial.println(currentMotor1);
-        int currentMotor2 = getCurrentMotor2();
-        Serial.println(currentMotor2);
-        if (currentMotor1 < 2000 && currentMotor2 < 2000) {
-          if (currentMotor1 < 70) {
-            currentMotor1 = 0;
-          }
-          else {
-            currentMotor1 = map(currentMotor1,70, 1300, 1, 255);
-          }
-          
-          if (currentMotor2 < 70) {
-            currentMotor2 = 0;
-          }
-          else {
-            currentMotor2 = map(currentMotor2,70, 1300, 1, 255);
-          }
+      if (Serial.availableForWrite() != 0) {     
         
-          unsigned int encoderMotor1 = getEncodervalueMotor1();
-          unsigned int encoderMotor2 = getEncodervalueMotor2();
-          
-          Serial.println(encoderMotor1);
-          Serial.println(encoderMotor2);
-          Serial.println("--");
-
-          bufSend[0] = char(currentMotor1);
-          bufSend[1] = char(encoderMotor1 & 0xFF);
-          bufSend[2] = char(encoderMotor1 >> 8);
-          bufSend[3] = char(currentMotor2);
-          bufSend[4] = char(encoderMotor2 & 0xFF);
-          bufSend[5] = char(encoderMotor2 >> 8);
-          //Serial.write(bufSend,6);
-        }
+        char sendcurrent1 = map(getCurrentMotor1(),70, 1300, 1, 255);
+        char sendcurrent2 = map(getCurrentMotor2(),70, 1300, 1, 255);
         
-        prev_millis = current_millis;
+        int encoderMotor1 = getEncodervalueMotor1();
+        int encoderMotor2 = getEncodervalueMotor2();
+       
+        bufSend[0] = char(sendcurrent1);
+        bufSend[1] = char(encoderMotor1 << 8);
+        bufSend[2] = char(encoderMotor1);
+        bufSend[3] = char(sendcurrent2);
+        bufSend[4] = char(encoderMotor2 << 8);
+        bufSend[5] = char(encoderMotor2);
+        Serial.write(bufSend,6);
+        memset(bufSend, 0, 6);
       }
+      prev_millis = current_millis;
     }
   }
+  
 
   //RECEIVE DATA FROM GUI (MOTOR SPEED)
   if (Serial.available() != 0) {
@@ -132,9 +111,6 @@ void loop() {
     bool emer = bitRead(buf[0],2);
     auto speed = buf[1];
 
-    if (motorid == 1) {
-      setDirectionMotor1(dir);
-      
     if (!motorid && !emer) {
       setDirectionMotor1((dir)?1:2);
       setSpeedMotor1(speed);
@@ -152,3 +128,4 @@ void loop() {
     newData = false;
   }
 }
+

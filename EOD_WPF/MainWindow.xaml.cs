@@ -206,12 +206,15 @@ namespace EOD_WPF
 
         private void UpdateUI(object sender, EventArgs args)
         {
-            encoder1 = BitConverter.ToInt16(message, 1);
-            encoder2 = BitConverter.ToInt16(message, 4);
-            ro1.Content = $"CH1:{encoder1}";
-            ro2.Content = $"CH2:{encoder2}";
-            ma1.Content = $"CH1:{(int)message[0]}";
-            ma2.Content = $"CH2:{(int)message[3]}";
+            if(Arduino.IsOpen)
+            {
+                encoder1 = BitConverter.ToInt16(message, 1);
+                encoder2 = BitConverter.ToInt16(message, 4);
+                ro1.Content = $"CH1:{encoder1}";
+                ro2.Content = $"CH2:{encoder2}";
+                ma1.Content = $"CH1:{(int)message[0]}";
+                ma2.Content = $"CH2:{(int)message[3]}";
+            }
         }
 
         private void SendMotor(bool id, bool dir, bool ebrake, int speed)
