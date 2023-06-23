@@ -114,7 +114,7 @@ namespace EOD_WPF
             dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 50); //100Hz
             dispatcherTimer.Start();
 
-
+            LeftTrigger.Value = 0.5;
 
             //Filling Comport Selector and setup comport
             foreach (string port in SerialPort.GetPortNames())
@@ -260,7 +260,7 @@ namespace EOD_WPF
                 Arduino.Handshake = Handshake.None;
                 Arduino.ReadTimeout = 100;
                 Arduino.Open();
-                Arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+                //Arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
 
                 new LogItem($"Connection established on {port}").print(log);
             }

@@ -72,31 +72,31 @@ void setup() {
 
 void loop() {
   // Communication SEND DATA
-  current_millis = millis();
-  if (current_millis != prev_millis) {
-    counter ++;
-    if (counter > 30) {
-      counter = 0;
-      if (Serial.availableForWrite() != 0) {     
+  // current_millis = millis();
+  // if (current_millis != prev_millis) {
+  //   counter ++;
+  //   if (counter > 30) {
+  //     counter = 0;
+  //     if (Serial.availableForWrite() != 0) {     
         
-        char sendcurrent1 = map(getCurrentMotor1(),70, 1300, 1, 255);
-        char sendcurrent2 = map(getCurrentMotor2(),70, 1300, 1, 255);
+  //       char sendcurrent1 = map(getCurrentMotor1(),70, 1300, 1, 255);
+  //       char sendcurrent2 = map(getCurrentMotor2(),70, 1300, 1, 255);
         
-        int encoderMotor1 = getEncodervalueMotor1();
-        int encoderMotor2 = getEncodervalueMotor2();
+  //       int encoderMotor1 = getEncodervalueMotor1();
+  //       int encoderMotor2 = getEncodervalueMotor2();
        
-        bufSend[0] = char(sendcurrent1);
-        bufSend[1] = char(encoderMotor1 << 8);
-        bufSend[2] = char(encoderMotor1);
-        bufSend[3] = char(sendcurrent2);
-        bufSend[4] = char(encoderMotor2 << 8);
-        bufSend[5] = char(encoderMotor2);
-        Serial.write(bufSend,6);
-        memset(bufSend, 0, 6);
-      }
-      prev_millis = current_millis;
-    }
-  }
+  //       bufSend[0] = char(sendcurrent1);
+  //       bufSend[1] = char(encoderMotor1 << 8);
+  //       bufSend[2] = char(encoderMotor1);
+  //       bufSend[3] = char(sendcurrent2);
+  //       bufSend[4] = char(encoderMotor2 << 8);
+  //       bufSend[5] = char(encoderMotor2);
+  //       Serial.write(bufSend,6);
+  //       memset(bufSend, 0, 6);
+  //     }
+  //     prev_millis = current_millis;
+  //   }
+  // }
   
 
   //RECEIVE DATA FROM GUI (MOTOR SPEED)
