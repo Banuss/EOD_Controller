@@ -1,8 +1,8 @@
 #include <Wire.h>
 #include <Adafruit_INA219.h>
 
-Adafruit_INA219 ina219;
-Adafruit_INA219 ina219_2(0x41);
+Adafruit_INA219 ina219(0x70);
+Adafruit_INA219 ina219_2(0x71);
 
 template <int order> // order is 1 or 2
 class LowPass

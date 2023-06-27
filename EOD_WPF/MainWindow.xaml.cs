@@ -16,6 +16,11 @@ using System.Reactive;
 using System.Collections;
 using System.Windows.Documents;
 using System.Windows.Media.Converters;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Windows.Interop;
+using System.IO;
 
 namespace EOD_WPF
 {
@@ -32,10 +37,9 @@ namespace EOD_WPF
         Dispatcher guiDisp = Application.Current.Dispatcher;
         int maxspeed = 1;
         double drift = 0.5;
-        byte[] message = new byte[6];
 
-        bool backward1 = false;
-        bool backward2 = false;
+        byte[] buffer = new byte[6];
+        Action kickoffRead = null;
 
         int encoder1 = 0;
         int encoder2 = 0;
@@ -80,6 +84,9 @@ namespace EOD_WPF
             RotationJ7.Maximum = franka.joints[7].angleMax;
             RotationJ7.Minimum = franka.joints[7].angleMin;
             RotationJ7.Value = (RotationJ7.Maximum + RotationJ7.Minimum) / 2;
+            RotationGripper.Maximum = franka.joints[8].angleMax;
+            RotationGripper.Minimum = franka.joints[8].angleMin;
+            RotationGripper.Value = (RotationGripper.Maximum + RotationGripper.Minimum) / 2;
 
             SpeedJ1.Maximum = maxspeed;
             SpeedJ1.Minimum = -maxspeed;
@@ -95,6 +102,11 @@ namespace EOD_WPF
             SpeedJ6.Minimum = -maxspeed;
             SpeedJ7.Maximum = maxspeed;
             SpeedJ7.Minimum = -maxspeed;
+
+            SpeedRotationG.Minimum = -maxspeed;
+            SpeedRotationG.Maximum = maxspeed;
+            SpeedClampG.Minimum = -maxspeed;
+            SpeedClampG.Maximum = maxspeed;
 
             SpeedX.Maximum = maxspeed;
             SpeedX.Minimum = -maxspeed;
@@ -114,13 +126,9 @@ namespace EOD_WPF
             dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 50); //100Hz
             dispatcherTimer.Start();
 
-            LeftTrigger.Value = 0.5;
 
             //Filling Comport Selector and setup comport
-            foreach (string port in SerialPort.GetPortNames())
-            {
-                comports.Items.Add(port);
-            }
+            fill_portnames();
 
             var gridView = new GridView();
             this.log.View = gridView;
@@ -135,7 +143,6 @@ namespace EOD_WPF
                 DisplayMemberBinding = new Binding("Message")
             });
 
-         
             franka.ForwardKinematics(franka.joints.Select(x => x.angle).ToArray());
 
             //Simulation Update Timer
@@ -145,14 +152,15 @@ namespace EOD_WPF
             updateLocation.Start();
         }
 
-  
 
-        private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void fill_portnames()
         {
-            if (!Arduino.IsOpen) return;   //If port is closed exit
-            Arduino.Read(message, 0, 6);
+            comports.Items.Clear();
+            foreach (string port in SerialPort.GetPortNames())
+            {
+                comports.Items.Add(port);
+            }
         }
-
 
         private void UpdateLocation(object sender, EventArgs args)
         {
@@ -180,7 +188,11 @@ namespace EOD_WPF
                 franka.joints[5].angle = RotationJ5.Value;
                 franka.joints[6].angle = RotationJ6.Value;
                 franka.joints[7].angle = RotationJ7.Value;
-                 franka.ForwardKinematics(franka.joints.Select(x => x.angle).ToArray());
+
+                //Rotation
+                franka.joints[9].angle = RotationGripper.Value;
+
+                franka.ForwardKinematics(franka.joints.Select(x => x.angle).ToArray());
             }
 
             else if (!(bool)Joint.IsChecked && (bool)Live.IsChecked)
@@ -191,16 +203,23 @@ namespace EOD_WPF
                 franka.updatecircle(new Vector3D(SliderX.Value, SliderY.Value, SliderZ.Value));
                 franka.InverseKinematics();
             }
-           
-        }
 
+            //RotationJ1.Value = franka.joints[1].angle;
+            //RotationJ2.Value = franka.joints[2].angle;
+            //RotationJ3.Value = franka.joints[3].angle;
+            //RotationJ4.Value = franka.joints[4].angle;
+            //RotationJ5.Value = franka.joints[5].angle;
+            //RotationJ6.Value = franka.joints[6].angle;
+            //RotationJ7.Value = franka.joints[7].angle;
+
+        }
 
         private void UpdateMotors(object sender, EventArgs args)
         {
             if (Arduino.IsOpen)
             {
-                SendMotor(false, backward1, false, (int)(LeftTrigger.Value * 255));
-                SendMotor(true, backward2, false, (int)(RightTrigger.Value * 255));
+                SendMotor(false, ClampSpeed.Value < 0, false, (int)(Math.Abs(ClampSpeed.Value) * 255));
+                SendMotor(true, RotationSpeed.Value < 0, false, (int)(Math.Abs(RotationSpeed.Value) * 255));
             }
         }
 
@@ -208,12 +227,11 @@ namespace EOD_WPF
         {
             if(Arduino.IsOpen)
             {
-                encoder1 = BitConverter.ToInt16(message, 1);
-                encoder2 = BitConverter.ToInt16(message, 4);
-                ro1.Content = $"CH1:{encoder1}";
-                ro2.Content = $"CH2:{encoder2}";
-                ma1.Content = $"CH1:{(int)message[0]}";
-                ma2.Content = $"CH2:{(int)message[3]}";
+                kickoffRead();
+                ro1.Content = $"R CH1:{BitConverter.ToInt16(buffer, 1)}";
+                ro2.Content = $"R CH2:{BitConverter.ToInt16(buffer, 4)}";
+                ma1.Content = $"F CH1:{(int)buffer[0]}";
+                ma2.Content = $"F CH2:{(int)buffer[3]}";
             }
         }
 
@@ -238,7 +256,9 @@ namespace EOD_WPF
 
         private void comports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ConnectToPort(comports.SelectedItem.ToString());
+            if(comports.Items.Count > 0) {
+                ConnectToPort(comports.SelectedItem.ToString());
+            }
         }
 
       
@@ -254,13 +274,18 @@ namespace EOD_WPF
                 Arduino.BaudRate = 115200;
                 //Arduino.ReadTimeout = 300;
                 Arduino.PortName = port;
-                Arduino.DataBits = 8;
-                Arduino.StopBits = StopBits.One;
-                Arduino.Parity = Parity.None;
-                Arduino.Handshake = Handshake.None;
-                Arduino.ReadTimeout = 100;
+                //Arduino.DataBits = 8;
+                //Arduino.StopBits = StopBits.One;
+                //Arduino.Parity = Parity.None;
+                //Arduino.Handshake = Handshake.None;
+                //Arduino.ReadTimeout = 100;
+
                 Arduino.Open();
-                //Arduino.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+                kickoffRead = delegate {
+                    Arduino.BaseStream.ReadAsync(buffer, 0, buffer.Length);
+                };
+                kickoffRead();
+
 
                 new LogItem($"Connection established on {port}").print(log);
             }
@@ -270,6 +295,8 @@ namespace EOD_WPF
                 Arduino.Close();
             }
         }
+
+
 
         private void LeftRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -283,29 +310,23 @@ namespace EOD_WPF
 
         private void MapController()
         {
-            controller.LeftTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() =>
-            {
-                if (!invert && e.Value >= LeftTrigger.Value)
-                {
-                    LeftTrigger.Value = e.Value;
-                }
-
-                if (invert)
-                {
-                    LeftTrigger.Value -= e.Value;
-                }
-            });
-
             controller.LeftThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
-                //XYZ MODE
-                if((bool)!Joint.IsChecked)
+                //Gripper Mode
+                if ((bool)Gripper.IsChecked)
                 {
-                    SpeedX.Value =  controller.LeftThumbstick.Value.X * SpeedX.Maximum;
-                    SpeedY.Value =  controller.LeftThumbstick.Value.Y * SpeedY.Maximum;
+                    ClampSpeed.Value = controller.LeftThumbstick.Value.X;
                 }
+
+                //XYZ MODE
+                
+                //{
+                //    SpeedX.Value =  controller.LeftThumbstick.Value.X * SpeedX.Maximum;
+                //    SpeedY.Value =  controller.LeftThumbstick.Value.Y * SpeedY.Maximum;
+                //}
+
                 //JOINT SPACE
-                else
+                else if ((bool)Joint.IsChecked)
                 {
                     SpeedJ1.Value = controller.LeftThumbstick.Value.X * SpeedJ1.Maximum;
                     SpeedJ2.Value = controller.LeftThumbstick.Value.Y * SpeedJ2.Maximum;
@@ -314,13 +335,18 @@ namespace EOD_WPF
 
             controller.RightThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
-                //XYZ MODE
-                if ((bool)!Joint.IsChecked)
+                //Gripper Mode
+                if ((bool)Gripper.IsChecked)
                 {
-                    SpeedZ.Value = controller.RightThumbstick.Value.Y * SpeedZ.Maximum;
+                    RotationSpeed.Value = controller.RightThumbstick.Value.X;
                 }
+                //XYZ MODE
+                
+                //{
+                //    SpeedZ.Value = controller.RightThumbstick.Value.Y * SpeedZ.Maximum;
+                //}
                 //JOINT SPACE
-                else
+                else if ((bool)Joint.IsChecked)
                 {
                     SpeedJ4.Value = controller.RightThumbstick.Value.X * SpeedJ4.Maximum;
                     SpeedJ5.Value = controller.RightThumbstick.Value.Y * SpeedJ5.Maximum;
@@ -331,16 +357,7 @@ namespace EOD_WPF
             {
                 if(controller.Start.Value)
                 {
-                    Live.IsChecked = !Live.IsChecked;
-                }
-            });
-
-            controller.X.ValueChanged += (s, e) => guiDisp.Invoke(() =>
-            {
-                if (controller.X.Value)
-                {
-                    backward1 = !backward1;
-                    backward2 = !backward2;
+                    Follow.IsChecked = !Follow.IsChecked;
                 }
             });
 
@@ -351,24 +368,6 @@ namespace EOD_WPF
                 {
                     Joint.IsChecked = !Joint.IsChecked;
                 }
-            });
-
-            controller.RightTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() =>
-            {
-                if (e.Value >= RightTrigger.Value)
-                {
-                    RightTrigger.Value = e.Value;
-                }
-            });
-
-            controller.LeftShoulder.ValueChanged += (s, e) => guiDisp.Invoke(() =>
-            {
-                LeftTrigger.Value = 0;
-            });
-
-            controller.RightShoulder.ValueChanged += (s, e) => guiDisp.Invoke(() =>
-            {
-                RightTrigger.Value = 0;
             });
 
             //DPAD
@@ -407,6 +406,27 @@ namespace EOD_WPF
             ((Slider)sender).Value = 0;
         }
 
-        
+        private void RefreshCOM_Click(object sender, RoutedEventArgs e)
+        {
+            fill_portnames();
+        }
+
+        private void StopCOM_Click(object sender, RoutedEventArgs e)
+        {
+            SendMotor(true, true, false, 0);
+            SendMotor(false, true, false, 0);
+            Arduino.Close();
+            new LogItem($"Connection closed on {Arduino.PortName}").print(log);
+        }
+
+        private void RotationSpeed_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ((Slider)sender).Value = 0;
+        }
+
+        private void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            ((Slider)sender).Value = 0;
+        }
     }
 }

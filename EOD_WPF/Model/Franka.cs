@@ -27,8 +27,11 @@ namespace EOD_WPF.Model
         private const string MODEL_PATH5 = "FRANKA_J5.STL";
         private const string MODEL_PATH6 = "FRANKA_J6.STL";
         private const string MODEL_PATH7 = "FRANKA_J7.STL";
-        private const string MODEL_PATHG = "FRANKA_G.STL";
-        int jointcount = 9;
+        private const string MODEL_PATHG1 = "FRANKA_G1.STL";
+        private const string MODEL_PATHG2 = "FRANKA_G2.STL";
+        private const string TIP = "TIP.STL";
+
+        int jointcount = 10;
 
         Model3DGroup RA = new Model3DGroup();
         Model3D newLocCircle = null; 
@@ -43,17 +46,16 @@ namespace EOD_WPF.Model
 
         double LearningRate = 0.1;
         double SamplingDistance = 0.15;
-        double DistanceThreshold = 20;
-        int movements = 10;
+        double DistanceThreshold = 10;
 
         public Franka(HelixViewport3D viewPort3d)
         {
             basePath = $"{Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName}\\Model\\";
-            List<string> modelsNames = new List<string>() { MODEL_PATHB, MODEL_PATH1, MODEL_PATH2, MODEL_PATH3, MODEL_PATH4, MODEL_PATH5, MODEL_PATH6, MODEL_PATH7, MODEL_PATHG };
+            List<string> modelsNames = new List<string>() { MODEL_PATHB, MODEL_PATH1, MODEL_PATH2, MODEL_PATH3, MODEL_PATH4, MODEL_PATH5, MODEL_PATH6, MODEL_PATH7, MODEL_PATHG1, MODEL_PATHG2};
             ModelVisual3D RoboticArm = new ModelVisual3D();
 
             var builder = new MeshBuilder(true, true);
-            builder.AddSphere(new Point3D(0, 0, 0), 50, 15, 15);
+            builder.AddSphere(new Point3D(0, 0, 0), 10);
             newLocCircle = new GeometryModel3D(builder.ToMesh(), Materials.Yellow);
             var NewLocation = new ModelVisual3D();
             NewLocation.Content = newLocCircle;
@@ -91,7 +93,10 @@ namespace EOD_WPF.Model
                 joints[i].model.Transform = tf;
                 tfg.Add(tf);
             }
-            headPoint =  new Vector3D(joints.Last().model.Bounds.Location.X, joints.Last().model.Bounds.Location.Y, joints.Last().model.Bounds.Location.Z);
+          // MessageBox.Show(joints.Last().model.Bounds.Location.);
+            //headPoint =  new Vector3D(joints.Last().model.Bounds.Location.X, joints.Last().model.Bounds.Location.Y, joints.Last().model.Bounds.Location.Z);
+            headPoint = new Vector3D(joints.Last().model.Bounds.Location.X +73, joints.Last().model.Bounds.Location.Y+94, joints.Last().model.Bounds.Location.Z);
+
             return headPoint;
         }
 
@@ -126,6 +131,7 @@ namespace EOD_WPF.Model
                 joints[1].rotPointX = 0;
                 joints[1].rotPointY = 0;
                 joints[1].rotPointZ = 333;
+                
 
                 joints[2].angleMax = RadToDeg(1.7628);
                 joints[2].angleMin = RadToDeg(-1.7628);
@@ -180,7 +186,19 @@ namespace EOD_WPF.Model
                 joints[7].rotAxisZ = 1;
                 joints[7].rotPointX = 0;
                 joints[7].rotPointY = 88;
-                joints[7].rotPointZ = 926;
+                //joints[7].rotPointZ = 926;
+                joints[7].rotPointZ = 1033;
+
+                joints[9].angleMax = RadToDeg(0.5);
+                joints[9].angleMin = RadToDeg(-0.5);
+                joints[9].rotAxisX = 0;
+                joints[9].rotAxisY = 0;
+                joints[9].rotAxisZ = 1;
+                joints[9].rotPointX = 0;
+                joints[9].rotPointY = 88;
+                joints[9].rotPointZ = 691;
+
+             
 
 
             }
