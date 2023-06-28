@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_INA219.h>
 
-Adafruit_INA219 ina219;
+Adafruit_INA219 ina219(0x40);
 Adafruit_INA219 ina219_2(0x41);
 
 template <int order> // order is 1 or 2
@@ -111,7 +111,9 @@ LowPass<2> lp(3,1e3,true);
 
 float getCurrentMotor1() {
   float xn = ina219.getCurrent_mA();
-  // xn = xn * -1;
+  if (xn < 0) {
+    xn = xn * -1;
+  }
 
   // // Compute the filtered signal
   // float yn = lp.filt(xn);
@@ -127,6 +129,9 @@ float getCurrentMotor1() {
 
 uint8_t getCurrentMotor2() {
   float xn = ina219_2.getCurrent_mA();
+  if (xn < 0) {
+    xn = xn * -1;
+  }
   // xn = xn * -1;
 
   // // Compute the filtered signal

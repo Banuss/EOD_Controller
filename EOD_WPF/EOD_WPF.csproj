@@ -9,6 +9,17 @@
 
   <ItemGroup>
     <None Remove="Logo_small.png" />
+    <None Remove="Model\FRANKA_BASE.STL" />
+    <None Remove="Model\FRANKA_G1.STL" />
+    <None Remove="Model\FRANKA_G2.STL" />
+    <None Remove="Model\FRANKA_J1.STL" />
+    <None Remove="Model\FRANKA_J2.STL" />
+    <None Remove="Model\FRANKA_J3.STL" />
+    <None Remove="Model\FRANKA_J4.STL" />
+    <None Remove="Model\FRANKA_J5.STL" />
+    <None Remove="Model\FRANKA_J6.STL" />
+    <None Remove="Model\FRANKA_J7.STL" />
+    <None Remove="Model\TIP.stl" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +34,39 @@
 
   <ItemGroup>
     <Resource Include="Logo_small.png" />
+    <Resource Include="Model\FRANKA_BASE.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_G1.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_G2.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J1.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J2.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J3.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J4.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J5.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J6.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\FRANKA_J7.STL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Model\TIP.stl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
