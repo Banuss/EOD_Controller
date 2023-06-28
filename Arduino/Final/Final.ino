@@ -1,10 +1,14 @@
 uint8_t buf[2]; //incoming
-uint8_t bufSend[6]; //incoming
+uint8_t bufSend[8]; //incoming
 
 int newData;
 long current_millis = 0;
+
 long prev_millis = 0;
+long prev_millis_conn = 0;
+
 long counter = 0;
+long counter_conn =0;
 
 #include "motors.h"
 #include "currentSensors.h"
@@ -23,10 +27,8 @@ long counter = 0;
 #define IN4 9
 #define ENB 10
 
-// Encoders
-#define SCL 12
-#define SDA 13
 
+#define MAXCURRENT 1200
 // Others
 void setup() {
   Serial.begin(115200);   
@@ -47,18 +49,25 @@ void setup() {
 
   uint32_t currentFrequency;
 
-  ina219.begin();
-  ina219_2.begin();
+  if (! ina219_2.begin()) {
+    Serial.println("Failed to find INA219 chip");
+    while (1) { delay(10); }
+  }
+  if (! ina219.begin()) {
+    Serial.println("Failed to find INA219 chip");
+    while (1) { delay(10); }
+  }
   delay(50);
 }
 
 void loop() {
-
+  delay(1);
   //Communication SEND DATA
   current_millis = millis();
+
   if (current_millis != prev_millis) {
     counter ++;
-    if (counter > 500) {
+    if (counter > 20) {
       counter = 0;
      
       if (Serial.availableForWrite() != 0) {     
@@ -66,20 +75,20 @@ void loop() {
         int currentMotor1 = getCurrentMotor1();
         int currentMotor2 = getCurrentMotor2();
 
-        if (currentMotor1 < 2000 && currentMotor2 < 2000) {
+        if (currentMotor1 <= MAXCURRENT && currentMotor2 <= MAXCURRENT) {
           
           if (currentMotor1 < 70) {
             currentMotor1 = 0;
           }
           else {
-            currentMotor1 = map(currentMotor1,70, 1300, 1, 255);
+            currentMotor1 = map(currentMotor1,70, MAXCURRENT, 1, 255);
           }
 
           if (currentMotor2 < 70) {
             currentMotor2 = 0;
           }
           else {
-            currentMotor2 = map(currentMotor2,70, 1300, 1, 255);
+            currentMotor2 = map(currentMotor2,70, MAXCURRENT, 1, 255);
           }
 
           unsigned int encoderMotor1 = getEncodervalueMotor1();
@@ -91,19 +100,42 @@ void loop() {
           bufSend[3] = char(currentMotor2);
           bufSend[4] = char(encoderMotor2 & 0xFF);
           bufSend[5] = char(encoderMotor2 >> 8);
-          
-          Serial.write(bufSend,6);
-          memset(bufSend, 0, 6);
+          bufSend[6] = char(128);
+          bufSend[7] = char(128);
+          Serial.write(bufSend,8);
+          //memset(bufSend, 0, 6);
         }
-      prev_millis = current_millis;
+        else if (currentMotor1 > MAXCURRENT || currentMotor2 > MAXCURRENT)
+        {
+            setDirectionMotor1(0);
+            setDirectionMotor2(0);
+            setSpeedMotor1(0);
+            setSpeedMotor2(0);
+            return 0;
+        }
+        prev_millis = current_millis;
       }
     }
   }
+
+  //Save the plastics! Ga uit wanneer connectie wegvalt
+  if (current_millis - prev_millis_conn > 500) 
+  { 
+    prev_millis_conn = current_millis;
+    setDirectionMotor1(0);
+    setDirectionMotor2(0);
+    setSpeedMotor1(0);
+    setSpeedMotor2(0);
+  }
+
+
+
 
   //RECEIVE DATA FROM GUI (MOTOR SPEED)
   if (Serial.available() != 0) {
     Serial.readBytes(buf, 2);
     newData = true;
+    prev_millis_conn = current_millis;
   }
 
   if (newData == true) {
@@ -128,5 +160,7 @@ void loop() {
     }
     newData = false;
   }
+
+
 }
 

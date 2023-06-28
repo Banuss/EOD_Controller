@@ -21,6 +21,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Interop;
 using System.IO;
+using System.Security.RightsManagement;
+using Newtonsoft.Json.Linq;
 
 namespace EOD_WPF
 {
@@ -38,11 +40,15 @@ namespace EOD_WPF
         int maxspeed = 1;
         double drift = 0.5;
 
-        byte[] buffer = new byte[6];
+        byte[] buffer = new byte[8];
         Action kickoffRead = null;
+
 
         int encoder1 = 0;
         int encoder2 = 0;
+
+        public event EventHandler FireAsync;
+        Task updaterumble;
 
         public MainWindow()
         {
@@ -56,7 +62,6 @@ namespace EOD_WPF
                 new LogItem($"Battery {controller.Battery.Value}").print(log);
             };
 
-            Arduino.ErrorReceived += (s, e) => guiDisp.Invoke(() => { new LogItem($"Error {e}").print(log); });
 
             //Lock Joint 3
             RotationJ3.IsEnabled = false;
@@ -126,6 +131,8 @@ namespace EOD_WPF
             dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 50); //100Hz
             dispatcherTimer.Start();
 
+           
+
 
             //Filling Comport Selector and setup comport
             fill_portnames();
@@ -150,6 +157,10 @@ namespace EOD_WPF
             updateLocation.Tick += new EventHandler(UpdateLocation);
             updateLocation.Interval = new TimeSpan(0, 0, 0, 0, 10); //100Hz
             updateLocation.Start();
+
+
+            FireAsync += HandleFireAsync;
+
         }
 
 
@@ -218,7 +229,7 @@ namespace EOD_WPF
         {
             if (Arduino.IsOpen)
             {
-                SendMotor(false, ClampSpeed.Value < 0, false, (int)(Math.Abs(ClampSpeed.Value) * 255));
+                SendMotor(false, SpeedClampG.Value > 0, false, (int)(Math.Abs(SpeedClampG.Value) * 255));
                 SendMotor(true, RotationSpeed.Value < 0, false, (int)(Math.Abs(RotationSpeed.Value) * 255));
             }
         }
@@ -227,12 +238,30 @@ namespace EOD_WPF
         {
             if(Arduino.IsOpen)
             {
-                kickoffRead();
+                ma1.Content = $"F CH1:{buffer[0]}";
                 ro1.Content = $"R CH1:{BitConverter.ToInt16(buffer, 1)}";
+                ma2.Content = $"F CH2:{buffer[3]}";
                 ro2.Content = $"R CH2:{BitConverter.ToInt16(buffer, 4)}";
-                ma1.Content = $"F CH1:{(int)buffer[0]}";
-                ma2.Content = $"F CH2:{(int)buffer[3]}";
+                FireAsync?.Invoke(this, EventArgs.Empty);
             }
+        }
+
+
+        public async void HandleFireAsync(object sender, EventArgs e)
+        {
+            if (updaterumble?.IsCompleted ?? true)
+                updaterumble = SendRumble();
+        }
+
+        private async Task SendRumble()
+        {
+            if ((buffer[0] > 0))
+            {
+                controller.RightRumble.Value = 255 / buffer[0];
+                await Task.Delay(500);
+                return;
+            }
+            controller.RightRumble.Value = 0;
         }
 
         private void SendMotor(bool id, bool dir, bool ebrake, int speed)
@@ -271,22 +300,12 @@ namespace EOD_WPF
             }
             try
             {
+                Arduino.ErrorReceived += (s, e) => guiDisp.Invoke(() => { new LogItem($"Error {e}").print(log); });
                 Arduino.BaudRate = 115200;
-                //Arduino.ReadTimeout = 300;
+                Arduino.ReadTimeout = 0;
                 Arduino.PortName = port;
-                //Arduino.DataBits = 8;
-                //Arduino.StopBits = StopBits.One;
-                //Arduino.Parity = Parity.None;
-                //Arduino.Handshake = Handshake.None;
-                //Arduino.ReadTimeout = 100;
-
+                Arduino.DataReceived += Arduino_DataReceived;
                 Arduino.Open();
-                kickoffRead = delegate {
-                    Arduino.BaseStream.ReadAsync(buffer, 0, buffer.Length);
-                };
-                kickoffRead();
-
-
                 new LogItem($"Connection established on {port}").print(log);
             }
             catch (Exception ex)
@@ -296,16 +315,15 @@ namespace EOD_WPF
             }
         }
 
-
-
-        private void LeftRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Arduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            controller.LeftRumble.Rumble((float)RoughRumble.Value);
-        }
-
-        private void RightRumble_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            controller.RightRumble.Rumble((float)FineRumble.Value);
+            var serialDevice = sender as SerialPort;
+            var buffer = new byte[serialDevice.BytesToRead];
+            serialDevice.Read(buffer, 0, buffer.Length);
+            if (buffer.Length > 7 && buffer[6] == 128 && buffer[7] ==128)
+            {
+                Array.Copy(buffer, this.buffer, 8);
+            }
         }
 
         private void MapController()
@@ -340,6 +358,12 @@ namespace EOD_WPF
                 {
                     RotationSpeed.Value = controller.RightThumbstick.Value.X;
                 }
+
+                if ((bool)GripperCopy.IsChecked)
+                {
+                    
+                }
+
                 //XYZ MODE
                 
                 //{
@@ -351,6 +375,17 @@ namespace EOD_WPF
                     SpeedJ4.Value = controller.RightThumbstick.Value.X * SpeedJ4.Maximum;
                     SpeedJ5.Value = controller.RightThumbstick.Value.Y * SpeedJ5.Maximum;
                 }
+            });
+
+
+            controller.LeftTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                SpeedClampG.Value = controller.RightTrigger.Value - controller.LeftTrigger.Value;
+            });
+
+            controller.RightTrigger.ValueChanged += (s, e) => guiDisp.Invoke(() =>
+            {
+                SpeedClampG.Value = controller.RightTrigger.Value - controller.LeftTrigger.Value;
             });
 
             controller.Start.ValueChanged += (s, e) => guiDisp.Invoke(() =>

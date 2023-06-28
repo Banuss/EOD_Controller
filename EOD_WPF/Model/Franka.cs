@@ -233,15 +233,11 @@ namespace EOD_WPF.Model
 
         public double PartialGradient(Vector3D target, double[] angles, int i)
         {
-            // Saves the angle,
-            // it will be restored later
             double angle = angles[i];
-            // Gradient : [F(x+SamplingDistance) - F(x)] / h
             double f_x = DistanceFromTarget(target, angles);
             angles[i] += SamplingDistance;
             double f_x_plus_d = DistanceFromTarget(target, angles);
             double gradient = (f_x_plus_d - f_x) / SamplingDistance;
-            // Restores
             angles[i] = angle;
             return gradient;
         }
