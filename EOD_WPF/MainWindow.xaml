@@ -12,12 +12,6 @@
             <ColumnDefinition Width="207*"/>
             <ColumnDefinition Width="433*"/>
         </Grid.ColumnDefinitions>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="RotationSpeed" Minimum="-1.0" Maximum="1.0" ToolTip="Left Trigger" Margin="6,241,0,0" Orientation="Vertical" Height="84" MouseLeave="MouseLeave" IsEnabled="False" />
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="18" x:Name="ClampSpeed" Minimum="-1.0" Maximum="1.0" ToolTip="Right Trigger" Margin="86,241,0,0" Orientation="Vertical" Height="84" MouseLeave="MouseLeave"/>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="LeftFeedback" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="26,241,0,0" Orientation="Vertical" Height="84"/>
-        <Slider HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" x:Name="FineRumble" Minimum="0.0" Maximum="1.0" ToolTip="Left Trigger" Margin="173,241,0,0" Orientation="Vertical" Height="84"/>
-        <Label x:Name="ma1" Content="Force CH1" HorizontalAlignment="Left" Margin="454,226,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="ma2" Content="Force CH2" HorizontalAlignment="Left" Margin="454,302,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="comports" HorizontalAlignment="Left" Margin="174,50,0,0" VerticalAlignment="Top" Width="84" SelectionChanged="comports_SelectionChanged"/>
         <ListView x:Name="log" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="1,80,0,0" HorizontalAlignment="Left" Width="584" Height="130" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
             <ListView.RenderTransform>
@@ -33,7 +27,7 @@
         <Label x:Name="Label_Arduino" Content="Select RobotController Port:" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.132,0.04" Width="165"/>
 
 
-        <h:HelixViewport3D x:Name="viewPort3d" ZoomExtentsWhenLoaded="True" CameraRotationMode="Turntable" ModelUpDirection="0,0,1" ShowCoordinateSystem="True" Panel.ZIndex="-50" Width="1920" Grid.ColumnSpan="2" Margin="-10,-1,10,0">
+        <h:HelixViewport3D x:Name="viewPort3d" ZoomExtentsWhenLoaded="True" CameraRotationMode="Turntable" ModelUpDirection="0,0,1" ShowCoordinateSystem="True" Panel.ZIndex="-50" Width="1920" Grid.ColumnSpan="2" Margin="1,-2,-1,1">
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera Position="-15, -20, 10" LookDirection="15, -20, -15" FieldOfView="45" UpDirection="0,0,1"/>
             </h:HelixViewport3D.Camera>
@@ -41,54 +35,84 @@
             <h:GridLinesVisual3D Width="1600" Length="1600" MinorDistance="100" MajorDistance="800" Thickness="2" Center="0, 0, 0">
             </h:GridLinesVisual3D>
         </h:HelixViewport3D>
+        <Grid HorizontalAlignment="Left" Height="235" VerticalAlignment="Top" Width="241" Margin="7,248,0,0">
 
-        <Slider x:Name="RotationJ1" HorizontalAlignment="Left" Margin="16,344,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ2" HorizontalAlignment="Left" Margin="16,380,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ3" HorizontalAlignment="Left" Margin="16,418,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ4" HorizontalAlignment="Left" Margin="16,454,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ5" HorizontalAlignment="Left" Margin="16,490,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ6" HorizontalAlignment="Left" Margin="16,525,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="RotationJ7" HorizontalAlignment="Left" Margin="16,561,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
 
-        <Slider x:Name="SpeedJ1" HorizontalAlignment="Left" Margin="137,344,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
-        <Slider x:Name="SpeedJ2" HorizontalAlignment="Left" Margin="137,380,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
-        <Slider x:Name="SpeedJ3" HorizontalAlignment="Left" Margin="137,418,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
-        <Slider x:Name="SpeedJ4" HorizontalAlignment="Left" Margin="137,454,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
-        <Slider x:Name="SpeedJ5" HorizontalAlignment="Left" Margin="137,490,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
-        <Slider x:Name="SpeedJ6" HorizontalAlignment="Left" Margin="137,525,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
-        <Slider x:Name="SpeedJ7" HorizontalAlignment="Left" Margin="137,561,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
+            <Slider x:Name="RotationJ1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
+            <Slider x:Name="RotationJ2" HorizontalAlignment="Left" Margin="0,36,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
+            <Slider x:Name="RotationJ3" HorizontalAlignment="Left" Margin="0,74,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
+            <Slider x:Name="RotationJ4" HorizontalAlignment="Left" Margin="0,110,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
+            <Slider x:Name="RotationJ5" HorizontalAlignment="Left" Margin="0,146,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
+            <Slider x:Name="RotationJ6" HorizontalAlignment="Left" Margin="0,181,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
+            <Slider x:Name="RotationJ7" HorizontalAlignment="Left" Margin="0,217,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
 
-        <Slider x:Name="SliderY" HorizontalAlignment="Left" Margin="212,241,0,0" VerticalAlignment="Top" Width="21" Maximum="1000" Minimum="-1000" Orientation="Vertical" Height="87" Value="500"/>
-        <Slider x:Name="SliderX" HorizontalAlignment="Left" Margin="218,233,0,0" VerticalAlignment="Top" Width="79" Maximum="1000" Minimum="-1000" Height="13" Value="0"/>
-        <Slider x:Name="SliderZ" HorizontalAlignment="Left" Margin="297,241,0,0" VerticalAlignment="Top" Width="15" Maximum="1000" Minimum="0" Orientation="Vertical" Height="84" Value="500"/>
 
-        <Slider x:Name="SpeedX" HorizontalAlignment="Left" Margin="323,241,0,0" VerticalAlignment="Top" Width="21" Maximum="1" Minimum="-1" Orientation="Vertical" Height="87" MouseLeave="MouseLeave"/>
-        <Slider x:Name="SpeedY" HorizontalAlignment="Left" Margin="329,233,0,0" VerticalAlignment="Top" Width="79" Maximum="1" Minimum="-1" Height="13" MouseLeave="MouseLeave"/>
-        <Slider x:Name="SpeedZ" HorizontalAlignment="Left" Margin="408,241,0,0" VerticalAlignment="Top" Width="15" Maximum="1" Minimum="-1" Orientation="Vertical" Height="84" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ1" HorizontalAlignment="Left" Margin="121,0,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ2" HorizontalAlignment="Left" Margin="121,36,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ3" HorizontalAlignment="Left" Margin="121,74,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ4" HorizontalAlignment="Left" Margin="121,110,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ5" HorizontalAlignment="Left" Margin="121,146,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ6" HorizontalAlignment="Left" Margin="121,181,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="SpeedJ7" HorizontalAlignment="Left" Margin="121,217,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Label Content="Joint Controls" HorizontalAlignment="Left" Margin="0,-31,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        </Grid>
+        <Grid HorizontalAlignment="Left" Height="94" Margin="1064,36,0,0" VerticalAlignment="Top" Width="212" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="71*"/>
+                <ColumnDefinition Width="141*"/>
+            </Grid.ColumnDefinitions>
+
+            <Slider x:Name="SliderY" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top" Width="21" Maximum="1000" Minimum="-1000" Orientation="Vertical" Height="87" Value="500"/>
+            <Slider x:Name="SliderX" HorizontalAlignment="Left" Margin="6,0,0,0" VerticalAlignment="Top" Width="79" Maximum="1000" Minimum="-1000" Height="13" Value="0" Grid.ColumnSpan="2"/>
+            <Slider x:Name="SliderZ" HorizontalAlignment="Left" Margin="14,8,0,0" VerticalAlignment="Top" Width="15" Maximum="1000" Minimum="0" Orientation="Vertical" Height="84" Value="500" Grid.Column="1"/>
+
+            <Slider x:Name="SpeedX" HorizontalAlignment="Left" Margin="40,8,0,0" VerticalAlignment="Top" Width="21" Maximum="1" Minimum="-1" Orientation="Vertical" Height="87" MouseLeave="MouseLeave" Grid.Column="1"/>
+            <Slider x:Name="SpeedY" HorizontalAlignment="Left" Margin="46,0,0,0" VerticalAlignment="Top" Width="79" Maximum="1" Minimum="-1" Height="13" MouseLeave="MouseLeave" Grid.Column="1"/>
+            <Slider x:Name="SpeedZ" HorizontalAlignment="Left" Margin="126,8,0,0" VerticalAlignment="Top" Width="15" Maximum="1" Minimum="-1" Orientation="Vertical" Height="84" MouseLeave="MouseLeave" Grid.Column="1"/>
+            <Label Content="Moving Headpoint" HorizontalAlignment="Left" Margin="-4,-26,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" FontWeight="Bold"/>
+
+        </Grid>
 
         <CheckBox x:Name="Live" Content="Simulate" HorizontalAlignment="Left" Margin="24,601,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <CheckBox x:Name="Joint" Content="XYZ/Joint" HorizontalAlignment="Left" Margin="24,621,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="Follow" Content="Follow" HorizontalAlignment="Left" Margin="24,641,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="xlabel" Content="X:" HorizontalAlignment="Left" Margin="1202,670,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="ylabel" Content="Y:" HorizontalAlignment="Left" Margin="1202,695,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="zlabel" Content="Z:" HorizontalAlignment="Left" Margin="1202,720,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="xball" Content="X:" HorizontalAlignment="Left" Margin="1203,754,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="yball" Content="Y:" HorizontalAlignment="Left" Margin="1203,779,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="zball" Content="Z:" HorizontalAlignment="Left" Margin="1203,804,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="ro1" Content="Rotatie CH1" HorizontalAlignment="Left" Margin="454,250,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="ro2" Content="Rotatie CH2" HorizontalAlignment="Left" Margin="454,322,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="Gripper" Content="Gripper" HorizontalAlignment="Left" Margin="24,660,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <Slider x:Name="RotationGripper" HorizontalAlignment="Left" Margin="2,692,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="SpeedRotationG" HorizontalAlignment="Left" Margin="123,692,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
-        <Slider x:Name="ClampGripper" HorizontalAlignment="Left" Margin="2,723,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180"/>
-        <Slider x:Name="SpeedClampG" HorizontalAlignment="Left" Margin="123,723,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseUp="resetSender"/>
-        <CheckBox x:Name="GripperCopy" Content="Gripper Copy" HorizontalAlignment="Left" Margin="137,660,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <Button x:Name="RefreshCOM" Content="Refresh" HorizontalAlignment="Left" Margin="272,51,0,0" VerticalAlignment="Top" Height="21" Width="48" Click="RefreshCOM_Click"/>
-        <Button x:Name="StopCOM" Content="Stop" HorizontalAlignment="Left" Margin="330,51,0,0" VerticalAlignment="Top" Height="21" Width="48" Click="StopCOM_Click"/>
-        <TextBox HorizontalAlignment="Left" Margin="274,10,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="205"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="484,10,0,0" VerticalAlignment="Top" Height="18"/>
-        <Button x:Name="HomeClamp" Grid.Column="1" Content="Home" HorizontalAlignment="Left" Margin="1243,13,0,0" VerticalAlignment="Top"/>
-        <Slider x:Name="PosRotation" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="1168" Maximum="180" Minimum="-180" Height="23" Value="0" Grid.Column="1"/>
+        <CheckBox x:Name="Joint" Content="Joint Control" HorizontalAlignment="Left" Margin="24,621,0,0" VerticalAlignment="Top" Checked="Joint_Checked" IsChecked="True"/>
+        <Grid Grid.Column="1" HorizontalAlignment="Left" Height="257" Margin="1203,0,0,0" VerticalAlignment="Center" Width="73">
+            <Label x:Name="ma1" Content="Force CH1" HorizontalAlignment="Left" Margin="0,161,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="ma2" Content="Force CH2" HorizontalAlignment="Left" Margin="0,209,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.464,-0.281"/>
+            <Label x:Name="xlabel" Content="X:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Label x:Name="ylabel" Content="Y:" HorizontalAlignment="Left" Margin="0,25,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="zlabel" Content="Z:" HorizontalAlignment="Left" Margin="0,50,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="xball" Content="X:" HorizontalAlignment="Left" Margin="1,84,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="yball" Content="Y:" HorizontalAlignment="Left" Margin="1,109,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="zball" Content="Z:" HorizontalAlignment="Left" Margin="1,134,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="ro1" Content="Rotatie CH1" HorizontalAlignment="Center" Margin="0,185,0,0" VerticalAlignment="Top"/>
+            <Label x:Name="ro2" Content="Rotatie CH2" HorizontalAlignment="Center" Margin="0,233,0,0" VerticalAlignment="Top"/>
+        </Grid>
+        <CheckBox x:Name="Gripper" Content="Gripper Move" HorizontalAlignment="Left" Margin="24,641,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="279" Margin="7,522,0,0">
+            <Slider x:Name="RotationGripper" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180" IsEnabled="False"/>
+            <Slider x:Name="SpeedRotationG" HorizontalAlignment="Left" Margin="121,0,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Slider x:Name="ClampGripper" HorizontalAlignment="Left" Margin="0,31,0,0" VerticalAlignment="Top" Width="120" Maximum="180" Minimum="-180" IsEnabled="False"/>
+            <Slider x:Name="SpeedClampG" HorizontalAlignment="Left" Margin="121,31,0,0" VerticalAlignment="Top" Width="120" Maximum="1" Minimum="-1" MouseLeave="MouseLeave"/>
+            <Label Content="Gripper Controls" HorizontalAlignment="Left" Margin="0,-31,0,0" VerticalAlignment="Top" Width="104" FontWeight="Bold"/>
+            <Label Content="Rotate" HorizontalAlignment="Left" Margin="233,-2,0,0" VerticalAlignment="Top" FontSize="8"/>
+            <Label Content="Clamp" HorizontalAlignment="Left" Margin="235,29,0,0" VerticalAlignment="Top" FontSize="8"/>
+        </Grid>
+        <Button x:Name="RefreshCOM" Content="Refresh" HorizontalAlignment="Left" Margin="262,50,0,0" VerticalAlignment="Top" Height="22" Width="48" Click="RefreshCOM_Click"/>
+        <Button x:Name="StopCOM" Content="Stop" HorizontalAlignment="Left" Margin="315,50,0,0" VerticalAlignment="Top" Height="22" Width="48" Click="StopCOM_Click"/>
+        <Grid HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Width="428" Margin="126,4,0,0" Grid.Column="1">
+            <TextBox HorizontalAlignment="Left" TextWrapping="Wrap" Text="https://www.bomkoffer.nl/demo/launchsession" VerticalAlignment="Center" Width="315" IsEnabled="False"/>
+            <Button Content="Connect Websocket" HorizontalAlignment="Left" Margin="320,0,0,0" VerticalAlignment="Center" Height="18"/>
+        </Grid>
         <Button x:Name="ClearLog" Content="Clear" HorizontalAlignment="Left" Margin="594,189,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="37"/>
+        <Grid HorizontalAlignment="Left" Height="125" Margin="24,899,0,0" VerticalAlignment="Top" Width="136">
+            <Slider HorizontalAlignment="Left" VerticalAlignment="Center" Width="18" x:Name="RumbleFactorLeft" Minimum="0.0" Maximum="3.0" ToolTip="Right Trigger" Margin="12,0,0,0" Orientation="Vertical" Height="84" Value="1"/>
+            <Slider HorizontalAlignment="Left" VerticalAlignment="Center" Width="18" x:Name="RumbleFactorRight" Minimum="0.0" Maximum="3.0" ToolTip="Right Trigger" Margin="51,0,0,0" Orientation="Vertical" Height="84" Value="1"/>
+            <Label Content="Left" HorizontalAlignment="Left" Margin="6,99,0,0" VerticalAlignment="Top"/>
+            <Label Content="Right" HorizontalAlignment="Left" Margin="41,99,0,0" VerticalAlignment="Top"/>
+            <Label Content="Rumble Sensitivity" HorizontalAlignment="Left" VerticalAlignment="Top" Width="123" Margin="-10,0,0,0" FontWeight="Bold"/>
+
+        </Grid>
+        <Label Content="Model Loaded: Franka Emika Panda" HorizontalAlignment="Left" Margin="1,1041,0,0" VerticalAlignment="Top" Width="251" FontSize="8" RenderTransformOrigin="-0.876,-0.612"/>
+
     </Grid>
 </Window>

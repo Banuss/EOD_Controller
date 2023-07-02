@@ -191,6 +191,7 @@ namespace EOD_WPF
                 if (Math.Abs(SpeedJ5.Value) > drift) RotationJ5.Value += SpeedJ5.Value;
                 if (Math.Abs(SpeedJ6.Value) > drift) RotationJ6.Value += SpeedJ6.Value;
                 if (Math.Abs(SpeedJ7.Value) > drift) RotationJ7.Value += SpeedJ7.Value;
+                if (Math.Abs(SpeedRotationG.Value) > drift) RotationGripper.Value += SpeedRotationG.Value;
 
                 franka.joints[1].angle = RotationJ1.Value;
                 franka.joints[2].angle = RotationJ2.Value;
@@ -230,7 +231,7 @@ namespace EOD_WPF
             if (Arduino.IsOpen)
             {
                 SendMotor(false, SpeedClampG.Value > 0, false, (int)(Math.Abs(SpeedClampG.Value) * 255));
-                SendMotor(true, RotationSpeed.Value < 0, false, (int)(Math.Abs(RotationSpeed.Value) * 255));
+                SendMotor(true, SpeedRotationG.Value < 0, false, (int)(Math.Abs(SpeedRotationG.Value) * 255));
             }
         }
 
@@ -255,12 +256,29 @@ namespace EOD_WPF
 
         private async Task SendRumble()
         {
-            if ((buffer[0] > 0))
+            if ((buffer[0] > 60))
             {
-                controller.RightRumble.Value = 255 / buffer[0];
-                await Task.Delay(500);
+                float rumble1 = (float)Math.Min(1.0, 255 / buffer[0] * RumbleFactorLeft.Value);
+                if(controller.LeftRumble.Value != rumble1)
+                {
+                    controller.LeftRumble.Value = rumble1;
+                    controller.RightRumble.Value = rumble1;
+                    await Task.Delay(50);
+                }
                 return;
             }
+            if ((buffer[3] > 35))
+            {
+                float rumble2 = (float)Math.Min(1.0, 255 / buffer[3] * RumbleFactorRight.Value);
+                if (controller.LeftRumble.Value != rumble2)
+                {
+                    controller.LeftRumble.Value = rumble2;
+                    controller.RightRumble.Value = rumble2;
+                    await Task.Delay(100);
+                }
+                return;
+            }
+            controller.LeftRumble.Value = 0;
             controller.RightRumble.Value = 0;
         }
 
@@ -331,24 +349,16 @@ namespace EOD_WPF
             controller.LeftThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
                 //Gripper Mode
-                if ((bool)Gripper.IsChecked)
+                if (!(bool)Joint.IsChecked)
                 {
-                    ClampSpeed.Value = controller.LeftThumbstick.Value.X;
+                    SpeedX.Value = controller.LeftThumbstick.Value.X * SpeedX.Maximum;
+                    SpeedY.Value =  controller.LeftThumbstick.Value.Y * SpeedY.Maximum;
                 }
-
-                //XYZ MODE
-                
-                //{
-                //    SpeedX.Value =  controller.LeftThumbstick.Value.X * SpeedX.Maximum;
-                //    SpeedY.Value =  controller.LeftThumbstick.Value.Y * SpeedY.Maximum;
-                //}
-
-                //JOINT SPACE
                 else if ((bool)Joint.IsChecked)
                 {
                     SpeedJ1.Value = controller.LeftThumbstick.Value.X * SpeedJ1.Maximum;
                     SpeedJ2.Value = controller.LeftThumbstick.Value.Y * SpeedJ2.Maximum;
-                }            
+                }
             });
 
             controller.RightThumbstick.ValueChanged += (s, e) => guiDisp.Invoke(() =>
@@ -356,20 +366,12 @@ namespace EOD_WPF
                 //Gripper Mode
                 if ((bool)Gripper.IsChecked)
                 {
-                    RotationSpeed.Value = controller.RightThumbstick.Value.X;
+                    SpeedRotationG.Value = controller.RightThumbstick.Value.X;
+                    if(!(bool)Joint.IsChecked)
+                    {
+                        SpeedZ.Value = controller.RightThumbstick.Value.Y * SpeedZ.Maximum;
+                    }
                 }
-
-                if ((bool)GripperCopy.IsChecked)
-                {
-                    
-                }
-
-                //XYZ MODE
-                
-                //{
-                //    SpeedZ.Value = controller.RightThumbstick.Value.Y * SpeedZ.Maximum;
-                //}
-                //JOINT SPACE
                 else if ((bool)Joint.IsChecked)
                 {
                     SpeedJ4.Value = controller.RightThumbstick.Value.X * SpeedJ4.Maximum;
@@ -392,10 +394,9 @@ namespace EOD_WPF
             {
                 if(controller.Start.Value)
                 {
-                    Follow.IsChecked = !Follow.IsChecked;
+                    Gripper.IsChecked = !Gripper.IsChecked;
                 }
             });
-
 
             controller.Back.ValueChanged += (s, e) => guiDisp.Invoke(() =>
             {
@@ -406,10 +407,17 @@ namespace EOD_WPF
             });
 
             //DPAD
-            controller.Left.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value -= 1; });
-            controller.Right.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value += 1; });
-            controller.Up.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value += 1; });
-            controller.Down.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value -= 1; });
+
+            int plus = 3;
+            controller.X.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ5.Value -= plus; });
+            controller.B.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ5.Value += plus; });
+            controller.Y.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ4.Value += plus; });
+            controller.A.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ4.Value -= plus; });
+
+            controller.Left.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value -= plus; });
+            controller.Right.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ7.Value += plus; });
+            controller.Up.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value += plus; });
+            controller.Down.ValueChanged += (s, e) => guiDisp.Invoke(() => { RotationJ6.Value -= plus; });
         }
 
 
@@ -462,6 +470,11 @@ namespace EOD_WPF
         private void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
             ((Slider)sender).Value = 0;
+        }
+
+        private void Joint_Checked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
